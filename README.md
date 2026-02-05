@@ -57,20 +57,36 @@ Este dataset y sus visualizaciones son útiles para:
 
 ## 🔧 Procesamiento de Datos
 
-Este repositorio implementa un pipeline completo de procesamiento:
+Este repositorio implementa un **pipeline ETL completo** de procesamiento:
 
-## 🔧 Procesamiento de Datos
+1. **Extracción (Extract):** Lectura y extracción de datos desde archivos CSV grandes
+2. **Limpieza (Clean):** Normalización de columnas, eliminación de duplicados, manejo de valores nulos
+3. **Transformación (Transform):** Cálculo de métricas derivadas, agregaciones y análisis
+4. **Carga (Load):** Guardado de datos procesados en múltiples formatos
+5. **Visualización (Visualize):** Generación de 11 gráficas profesionales en español
 
-Este repositorio implementa un pipeline completo de procesamiento:
+### 📦 Módulos Implementados
 
-1. **Extracción:** Lectura de datos desde archivos CSV grandes
-2. **Limpieza:** Normalización de columnas, eliminación de duplicados, manejo de valores nulos
-3. **Transformación:** Cálculo de métricas derivadas y agregaciones
-4. **Visualización:** Generación de 11 gráficas profesionales en español
+#### **Config.py** - Configuración Centralizada
+Gestiona toda la configuración del proyecto:
+- 📁 Rutas de directorios (datos, salida, figuras)
+- ⚙️ Parámetros de procesamiento (tamaño de chunks: 100,000 filas)
+- 📊 Configuración de visualización (tamaños de figura, DPI, paletas de colores)
+- 📝 Definición de columnas esperadas y tipos de datos
+- 🛠️ Funciones de utilidad (creación de directorios, resumen de configuración)
 
-### Limpieza de Datos Implementada
+#### **Extract.py** - Extracción de Datos
+Clase `DataExtractor` con múltiples métodos de extracción:
+- `extract_full()`: Carga completa de datos en memoria
+- `extract_chunks()`: Iterador para procesamiento por chunks
+- `extract_columns()`: Extracción de columnas específicas
+- `extract_sample()`: Muestreo aleatorio del dataset
+- `extract_by_state()`: Filtrado por estado(s)
+- `extract_date_range()`: Filtrado por rango de fechas
+- `get_info()`: Información del archivo sin cargar datos
 
-El script `Extract/Clean/Clean.py` realiza:
+#### **Clean.py** - Limpieza de Datos
+Procesamiento robusto para archivos grandes:
 - ✅ Procesamiento por chunks (para archivos >50MB)
 - ✅ Normalización de nombres de columnas (minúsculas, sin espacios)
 - ✅ Eliminación de espacios en blanco en strings
@@ -78,14 +94,62 @@ El script `Extract/Clean/Clean.py` realiza:
 - ✅ Parsing de fechas automático
 - ✅ Eliminación de filas duplicadas
 - ✅ Eliminación de filas completamente vacías
+- ✅ Memoria eficiente con streaming
 
 **Resultado:** Dataset limpio guardado en `Output/IntegratedData_cleaned.csv`
 
-## Estado actual
+#### **Transform.py** - Transformación de Datos
+Clase `DataTransformer` con análisis avanzado:
+- 📈 **Promedios Móviles:** Suavizado de series temporales (ventanas configurables)
+- 📊 **Tasas Derivadas:** Mortalidad, crecimiento, cambios porcentuales
+- 🔢 **Agregaciones:** Por fecha, estado, condado
+- 🏆 **Rankings:** Top N estados/condados por cualquier métrica
+- 🔗 **Correlaciones:** Matrices de correlación entre variables
+- 📅 **Features Temporales:** Año, mes, semana, día, trimestre
+- 🔧 **Normalización:** MinMax y Z-score
+- 🚫 **Outliers:** Detección y remoción (IQR y Z-score)
 
-- ✅ Implementado: limpieza por chunks (ver `Extract/Clean/Clean.py`)
-- ✅ Implementado: 11 visualizaciones claras en español (`Vizualize/plot.py`)
-- ✅ Incluye mapa de calor de correlación completo
+#### **Load.py** - Carga y Persistencia
+Clase `DataLoader` para guardar/cargar datos:
+- 💾 **Formatos Múltiples:** CSV, Excel, JSON, Parquet
+- 📦 **Procesamiento Chunked:** Guardado por chunks para archivos grandes
+- 🔄 **Backups Automáticos:** Creación de copias de seguridad con timestamp
+- 📋 **Metadatos:** Guardado de información sobre los datasets
+- 📁 **Gestión de Archivos:** Listado, información, organización
+
+#### **pipeline.py** - Pipeline ETL Completo
+Script integrador que ejecuta todo el flujo:
+```bash
+# Ejecutar pipeline completo
+python pipeline.py
+
+# Ver configuración
+python pipeline.py --show-config
+
+# Especificar archivo de entrada
+python pipeline.py --input MiArchivo.csv
+
+# Sin archivos intermedios
+python pipeline.py --skip-intermediate
+```
+
+**El pipeline ejecuta:**
+1. ✅ Extracción y limpieza de datos (chunks)
+2. ✅ Transformaciones (promedios móviles, tasas, features)
+3. ✅ Carga de datos transformados (CSV + metadatos + backup)
+4. ✅ Análisis y agregaciones (nacional, estados, condados)
+5. ✅ Generación de archivos intermedios útiles
+
+## 📊 Estado Actual del Proyecto
+
+- ✅ **Configuración:** Módulo completo con todas las constantes
+- ✅ **Extracción:** 7 métodos diferentes de lectura de datos
+- ✅ **Limpieza:** Procesamiento por chunks implementado
+- ✅ **Transformación:** 15+ funciones de análisis y transformación
+- ✅ **Carga:** Soporte para 4 formatos de archivo
+- ✅ **Visualización:** 11 gráficas profesionales en español
+- ✅ **Pipeline:** Script integrador completo funcional
+- ✅ **Documentación:** README exhaustivo con ejemplos
 
 ## Visualizaciones Generadas (11 gráficas en español)
 
