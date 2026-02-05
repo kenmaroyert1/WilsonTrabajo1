@@ -198,6 +198,8 @@ python pipeline.py --skip-intermediate
 ### 1️⃣ Evolución Temporal de Casos y Muertes (Nacional)
 **Archivo:** `1_evolucion_casos_muertes.png`
 
+![Evolución Temporal de Casos y Muertes](Output/figures/1_evolucion_casos_muertes.png)
+
 **Qué muestra:** Gráfica de líneas doble (eje Y dual) que muestra la suma nacional diaria de casos y muertes a lo largo del tiempo.
 
 **Interpretación:** 
@@ -215,6 +217,8 @@ Esta visualización es fundamental para entender la cronología de la pandemia. 
 
 ### 2️⃣ Top 10 Condados con Más Casos Acumulados
 **Archivo:** `2_top_condados_casos.png`
+
+![Top 10 Condados con Más Casos](Output/figures/2_top_condados_casos.png)
 
 **Qué muestra:** Gráfica de barras horizontales mostrando los 10 condados con mayor número de casos totales, incluyendo nombre del estado.
 
@@ -237,6 +241,8 @@ Muestra las "zonas calientes" de la pandemia. Los condados con más casos suelen
 ### 3️⃣ Relación entre Casos Diarios y Muertes Diarias
 **Archivo:** `3_casos_vs_muertes.png`
 
+![Casos vs Muertes Diarias](Output/figures/3_casos_vs_muertes.png)
+
 **Qué muestra:** Diagrama de dispersión con línea de tendencia mostrando la correlación entre casos diarios y muertes diarias.
 
 **Interpretación:**
@@ -258,6 +264,8 @@ La pendiente de la línea roja muestra la "letalidad promedio" del virus. Si la 
 
 ### 4️⃣ Impacto de Cambios en Movilidad sobre Casos Nuevos
 **Archivo:** `4_movilidad_correlacion.png`
+
+![Correlación Movilidad y Casos](Output/figures/4_movilidad_correlacion.png)
 
 **Qué muestra:** Gráfica de barras mostrando correlaciones entre diferentes tipos de movilidad (comercios, supermercados, parques, transporte, trabajo, residencial) y casos diarios.
 
@@ -282,6 +290,8 @@ Esta es una de las gráficas más importantes para políticas públicas. Muestra
 ### 5️⃣ Comparación: Días Laborales vs Fines de Semana
 **Archivo:** `5_comparacion_dias.png`
 
+![Comparación Días Laborales vs Fines de Semana](Output/figures/5_comparacion_dias.png)
+
 **Qué muestra:** Dos gráficas de barras comparando promedios de casos y muertes en días laborales versus fines de semana.
 
 **Interpretación:**
@@ -304,6 +314,8 @@ Muestra un sesgo importante en los datos: los fines de semana típicamente tiene
 
 ### 6️⃣ Top 10 Estados Más Afectados
 **Archivo:** `6_top_estados_casos.png`
+
+![Top 10 Estados Más Afectados](Output/figures/6_top_estados_casos.png)
 
 **Qué muestra:** Gráfica de barras horizontales mostrando los 10 estados con mayor número de casos totales acumulados.
 
@@ -329,6 +341,8 @@ Escalada a nivel estatal, muestra qué estados fueron más golpeados por la pand
 ### 7️⃣ Tasa de Mortalidad por Estado
 **Archivo:** `7_tasa_mortalidad_estados.png`
 
+![Tasa de Mortalidad por Estado](Output/figures/7_tasa_mortalidad_estados.png)
+
 **Qué muestra:** Top 15 estados con mayor porcentaje de muertes respecto a casos (tasa de letalidad).
 
 **Interpretación:**
@@ -353,6 +367,8 @@ Esta gráfica es MÁS importante que el número absoluto de casos, porque muestr
 
 ### 8️⃣ Evolución de Movilidad en el Tiempo
 **Archivo:** `8_evolucion_movilidad.png`
+
+![Evolución de Movilidad en el Tiempo](Output/figures/8_evolucion_movilidad.png)
 
 **Qué muestra:** Series temporales de cambios en movilidad para diferentes categorías (suavizado con promedio de 7 días).
 
@@ -383,6 +399,8 @@ Esta es una "radiografía del comportamiento social" durante la pandemia. Cuenta
 ### 9️⃣ Distribución por Día de la Semana
 **Archivo:** `9_casos_dia_semana.png`
 
+![Distribución por Día de la Semana](Output/figures/9_casos_dia_semana.png)
+
 **Qué muestra:** Dos gráficas mostrando promedio de casos y muertes para cada día de la semana (Lunes a Domingo).
 
 **Interpretación:**
@@ -409,6 +427,8 @@ Detalla día por día el patrón semanal de reportes y casos reales. Observacion
 
 ### 🔟 Promedio Móvil de Casos (7 días)
 **Archivo:** `10_promedio_movil.png`
+
+![Promedio Móvil de 7 Días](Output/figures/10_promedio_movil.png)
 
 **Qué muestra:** Dos gráficas con datos diarios (línea tenue) y promedio móvil de 7 días (línea gruesa) para casos y muertes.
 
@@ -443,6 +463,8 @@ Esta es la versión "limpia" de los datos diarios. El promedio móvil de 7 días
 
 ### 1️⃣1️⃣ Mapa de Calor de Correlación Completo
 **Archivo:** `11_mapa_calor_correlacion.png`
+
+![Mapa de Calor de Correlación](Output/figures/11_mapa_calor_correlacion.png)
 
 **Qué muestra:** Matriz de correlación entre todas las variables numéricas del dataset (casos, muertes, movilidad, fin de semana, feriados).
 
