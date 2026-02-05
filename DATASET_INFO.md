@@ -47,8 +47,6 @@ Cambios porcentuales respecto a una línea base pre-pandemia en visitas a:
 
 ## 🎯 ¿Para Qué Sirve Este Dataset?
 
-Este dataset es una herramienta valiosa para múltiples propósitos:
-
 ### 1. 🏥 Análisis Epidemiológico
 
 **Aplicaciones:**
@@ -63,6 +61,11 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Investigadores de salud pública
 - Hospitales y sistemas de salud
 - Organizaciones sanitarias internacionales (CDC, OMS)
+
+**Ejemplo práctico:**
+Un hospital puede usar las gráficas de evolución temporal para anticipar picos de hospitalizaciones 2-3 semanas después de ver aumentos en casos diarios.
+
+---
 
 ### 2. 🏛️ Políticas de Salud Pública
 
@@ -79,6 +82,11 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Planificadores de políticas públicas
 - Gestores de emergencias
 
+**Ejemplo práctico:**
+Un gobierno local puede usar las correlaciones entre movilidad y casos para diseñar restricciones específicas (ej: limitar transporte público pero permitir parques).
+
+---
+
 ### 3. 🚶 Estudios de Comportamiento Social
 
 **Aplicaciones:**
@@ -94,6 +102,11 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Investigadores de comportamiento humano
 - Urbanistas y planificadores urbanos
 
+**Ejemplo práctico:**
+Investigadores pueden estudiar si el trabajo remoto (observado en datos de movilidad laboral) tuvo impacto real en la reducción de casos.
+
+---
+
 ### 4. 🎓 Investigación Académica
 
 **Aplicaciones:**
@@ -108,6 +121,11 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Investigadores en ciencia de datos
 - Estudiantes de maestría y doctorado
 - Centros de investigación
+
+**Ejemplo práctico:**
+Un estudiante de maestría puede usar este dataset para entrenar un modelo que prediga casos futuros basándose en patrones de movilidad actuales.
+
+---
 
 ### 5. 💼 Toma de Decisiones Empresariales
 
@@ -125,6 +143,11 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Analistas de negocios
 - Consultores estratégicos
 
+**Ejemplo práctico:**
+Una cadena de supermercados puede usar los datos de movilidad para decidir cuántas tiendas mantener abiertas y en qué horarios durante picos de pandemia.
+
+---
+
 ### 6. 🗣️ Comunicación y Periodismo
 
 **Aplicaciones:**
@@ -139,31 +162,41 @@ Este dataset es una herramienta valiosa para múltiples propósitos:
 - Diseñadores de información
 - Equipos de comunicación pública
 
+**Ejemplo práctico:**
+Un periodista puede usar las gráficas de promedio móvil para explicar por qué los reportes diarios tienen fluctuaciones y por qué las tendencias de 7 días son más confiables.
+
 ---
 
-## 📊 Visualizaciones Generadas (11 Gráficas Profesionales)
+## 📊 Visualizaciones del Dataset (11 Gráficas Profesionales)
 
-Este proyecto genera automáticamente 11 visualizaciones profesionales en español que ayudan a interpretar los datos. Todas las gráficas se guardan en alta resolución (300 DPI) en `Output/figures/`.
+Este proyecto genera automáticamente 11 visualizaciones en español que ayudan a interpretar los datos. Todas se guardan en alta resolución (300 DPI) en `Output/figures/`.
+
+---
 
 ### 1️⃣ Evolución Temporal de Casos y Muertes (Nacional)
 **Archivo:** `1_evolucion_casos_muertes.png`
 
 ![Evolución Temporal de Casos y Muertes](Output/figures/1_evolucion_casos_muertes.png)
 
-**Qué muestra:** Gráfica de líneas doble (eje Y dual) que muestra la suma nacional diaria de casos y muertes a lo largo del tiempo.
+**¿Qué muestra?**
+Gráfica de líneas doble con dos ejes Y que muestra la suma nacional diaria de casos (azul) y muertes (rojo) a lo largo del tiempo.
 
-**Interpretación:** 
-- Permite identificar olas/picos de la pandemia
-- Observar la relación temporal entre casos y muertes
-- Las muertes suelen seguir a los casos con un retraso de ~2-3 semanas
+**¿Cómo interpretarla?**
+- **Picos azules (casos):** Indican olas de contagios
+- **Picos rojos (muertes):** Siguen a los picos de casos con 2-3 semanas de retraso
+- **Altura de picos:** Muestra la severidad de cada ola
+- **Distancia entre olas:** Indica períodos de recuperación
 
-**¿Qué nos dice esta gráfica?**
-Esta visualización es fundamental para entender la cronología de la pandemia. Los picos azules (casos) anticipan picos rojos (muertes), lo que ayuda a:
-- Predecir carga hospitalaria futura
-- Evaluar si las medidas de salud pública están funcionando
-- Identificar cuándo comienza y termina cada ola de contagios
+**¿Qué nos dice?**
+Esta visualización es fundamental para entender la cronología de la pandemia:
+- Los picos de casos anticipan picos de muertes (útil para predicción)
+- Permite identificar cuándo comienza y termina cada ola
+- Muestra si las medidas de salud pública están funcionando (picos más bajos)
 
-**Utilidad práctica:** Hospitales pueden prepararse para picos de muertes 2-3 semanas después de picos de casos.
+**Utilidad práctica:**
+- **Hospitales:** Prepararse para picos de muertes 2-3 semanas después de ver picos de casos
+- **Gobiernos:** Decidir cuándo implementar restricciones (ola creciente) o levantarlas (ola descendente)
+- **Público general:** Evaluar riesgo personal según la tendencia actual
 
 ---
 
@@ -172,23 +205,25 @@ Esta visualización es fundamental para entender la cronología de la pandemia. 
 
 ![Top 10 Condados con Más Casos](Output/figures/2_top_condados_casos.png)
 
-**Qué muestra:** Gráfica de barras horizontales mostrando los 10 condados con mayor número de casos totales, incluyendo nombre del estado.
+**¿Qué muestra?**
+Gráfica de barras horizontales ordenada mostrando los 10 condados con mayor número de casos totales, incluyendo el nombre del estado entre paréntesis.
 
-**Interpretación:**
-- Identifica las áreas más afectadas por la pandemia
-- Condados urbanos grandes típicamente tienen más casos debido a mayor densidad poblacional
-- Útil para priorizar recursos de salud pública
+**¿Cómo interpretarla?**
+- **Barra más larga:** Condado con más casos acumulados
+- **Comparación visual:** Muestra la diferencia relativa entre condados
+- **Nombres:** Formato "Condado (Estado)" para identificación clara
 
-**¿Qué nos dice esta gráfica?**
-Muestra las "zonas calientes" de la pandemia. Los condados con más casos suelen ser:
-- Áreas metropolitanas grandes (Los Angeles, Nueva York, Chicago)
-- Centros de transporte y comercio
-- Zonas con mayor densidad poblacional
+**¿Qué nos dice?**
+Muestra las "zonas calientes" de la pandemia:
+- Típicamente son áreas metropolitanas grandes (Los Angeles, Nueva York, Chicago)
+- Reflejan densidad poblacional y conectividad (aeropuertos, comercio)
+- Indican dónde se concentró el mayor impacto de la pandemia
 
-**Utilidad práctica:** 
-- Gobiernos pueden dirigir vacunas y recursos médicos a estas áreas prioritarias
-- Empresas pueden ajustar operaciones según riesgo por zona
-- Investigadores pueden estudiar factores comunes en áreas más afectadas
+**Utilidad práctica:**
+- **Gobiernos:** Dirigir vacunas y recursos médicos a estas áreas prioritarias
+- **Empresas:** Ajustar operaciones según nivel de riesgo por zona
+- **Investigadores:** Estudiar qué factores tienen en común las áreas más afectadas
+- **Planificación:** Priorizar mejoras en infraestructura de salud
 
 ---
 
@@ -197,24 +232,30 @@ Muestra las "zonas calientes" de la pandemia. Los condados con más casos suelen
 
 ![Casos vs Muertes Diarias](Output/figures/3_casos_vs_muertes.png)
 
-**Qué muestra:** Diagrama de dispersión con línea de tendencia mostrando la correlación entre casos diarios y muertes diarias.
+**¿Qué muestra?**
+Diagrama de dispersión (scatter plot) con línea de tendencia roja mostrando la correlación entre casos diarios (eje X) y muertes diarias (eje Y).
 
-**Interpretación:**
-- Muestra la tasa de letalidad implícita (pendiente de la línea)
-- Puntos dispersos indican variabilidad por factores como edad, acceso a salud, etc.
-- Tendencia positiva esperada: más casos → más muertes
+**¿Cómo interpretarla?**
+- **Cada punto:** Representa un día específico
+- **Línea roja:** Muestra la tendencia general (letalidad promedio)
+- **Pendiente empinada:** Alta letalidad
+- **Puntos dispersos:** Variabilidad por múltiples factores
 
-**¿Qué nos dice esta gráfica?**
-La pendiente de la línea roja muestra la "letalidad promedio" del virus. Si la línea es muy empinada, significa alta mortalidad relativa. La dispersión de puntos indica que hay muchos factores adicionales:
-- Calidad del sistema de salud local
-- Demografía (áreas con población mayor tienen más muertes)
-- Acceso a tratamientos y vacunas
-- Variantes del virus circulantes
+**¿Qué nos dice?**
+La pendiente de la línea muestra la "letalidad promedio" del virus:
+- **Alta pendiente:** Más muertes por cada caso (peor escenario)
+- **Baja pendiente:** Menos muertes por caso (tratamientos mejorando)
+- **Dispersión:** Indica que hay muchos factores adicionales:
+  - Calidad del sistema de salud local
+  - Demografía (población mayor = más muertes)
+  - Acceso a tratamientos y vacunas
+  - Variantes del virus circulantes
 
 **Utilidad práctica:**
-- Comparar letalidad entre diferentes períodos
-- Evaluar efectividad de tratamientos (si la pendiente disminuye con el tiempo)
-- Identificar outliers que requieren investigación especial
+- **Comparar períodos:** Si la pendiente disminuye con el tiempo, indica mejora en tratamientos
+- **Evaluar efectividad:** Medir si nuevos tratamientos reducen la letalidad
+- **Identificar outliers:** Días con muertes inusualmente altas requieren investigación
+- **Predicción:** Estimar muertes futuras basándose en casos actuales
 
 ---
 
@@ -223,25 +264,31 @@ La pendiente de la línea roja muestra la "letalidad promedio" del virus. Si la 
 
 ![Correlación Movilidad y Casos](Output/figures/4_movilidad_correlacion.png)
 
-**Qué muestra:** Gráfica de barras mostrando correlaciones entre diferentes tipos de movilidad (comercios, supermercados, parques, transporte, trabajo, residencial) y casos diarios.
+**¿Qué muestra?**
+Gráfica de barras mostrando las correlaciones entre diferentes tipos de movilidad y casos diarios, con colores indicando el tipo de correlación.
 
-**Interpretación:**
-- **Barras verdes (negativas):** Menos actividad = menos casos (ej: más tiempo en casa)
-- **Barras naranjas (positivas):** Más actividad = más casos (ej: más visitas a tiendas)
-- Ayuda a entender qué comportamientos reducen/aumentan contagios
+**¿Cómo interpretarla?**
+- **Barras verdes (negativas):** Menos actividad = menos casos (ej: quedarse en casa)
+- **Barras naranjas/rojas (positivas):** Más actividad = más casos (ej: transporte público)
+- **Altura de barra:** Fuerza de la correlación
 
-**¿Qué nos dice esta gráfica?**
-Esta es una de las gráficas más importantes para políticas públicas. Muestra qué cambios en comportamiento están correlacionados con casos:
+**¿Qué nos dice?**
+Esta es UNA DE LAS GRÁFICAS MÁS IMPORTANTES para políticas públicas:
 
-- **Correlación negativa (buena):** Aumento en tiempo residencial (quedarse en casa) reduce casos
-- **Correlación positiva (esperada):** Más visitas a comercios y lugares públicos aumentan casos
-- **Transporte público:** Alta correlación positiva porque implica cercanía física prolongada
+**Correlaciones negativas (buenas):**
+- **Movilidad residencial:** Más tiempo en casa → menos casos ✓
+
+**Correlaciones positivas (esperadas):**
+- **Transporte público:** Alta correlación (cercanía física prolongada)
+- **Comercios:** Más visitas a tiendas → más casos
+- **Lugares de trabajo:** Oficinas cerradas → más trabajo remoto → menos casos
 
 **Utilidad práctica:**
-- Diseñar medidas de confinamiento efectivas (enfocarse en reducir actividades con mayor correlación)
-- Evaluar impacto de políticas (¿funcionó el cierre de comercios?)
-- Educación pública: comunicar qué actividades son más riesgosas
-- Empresas: decidir políticas de trabajo remoto basadas en datos
+- **Diseñar restricciones efectivas:** Enfocarse en reducir actividades con mayor correlación positiva
+- **Evaluar políticas:** ¿Funcionó el cierre de comercios? Ver si la movilidad realmente bajó
+- **Educación pública:** Comunicar qué actividades son más riesgosas
+- **Empresas:** Decidir políticas de trabajo remoto basadas en datos reales
+- **Priorizar medidas:** Si recursos son limitados, restringir primero transporte público
 
 ---
 
@@ -250,25 +297,31 @@ Esta es una de las gráficas más importantes para políticas públicas. Muestra
 
 ![Comparación Días Laborales vs Fines de Semana](Output/figures/5_comparacion_dias.png)
 
-**Qué muestra:** Dos gráficas de barras comparando promedios de casos y muertes en días laborales versus fines de semana.
+**¿Qué muestra?**
+Dos gráficas de barras lado a lado comparando promedios de casos (izquierda) y muertes (derecha) en días laborales versus fines de semana.
 
-**Interpretación:**
-- Identifica patrones de reporte (algunos lugares reportan menos en fines de semana)
-- Puede reflejar diferencias reales en comportamiento social
-- Útil para ajustar modelos predictivos
+**¿Cómo interpretarla?**
+- **Barras azules/moradas:** Días laborales (L-V)
+- **Barras rojas/naranjas:** Fines de semana (S-D)
+- **Altura relativa:** Muestra diferencias en reportes
 
-**¿Qué nos dice esta gráfica?**
-Muestra un sesgo importante en los datos: los fines de semana típicamente tienen menos casos reportados, pero NO necesariamente menos contagios reales. Esto se debe a:
+**¿Qué nos dice?**
+Revela un SESGO IMPORTANTE en los datos:
 
-- **Efecto administrativo:** Menos personal trabajando en laboratorios y oficinas de salud
-- **Retraso en reportes:** Los casos del fin de semana se reportan el lunes/martes
-- **Comportamiento real:** Menos gente va al médico en fin de semana
+**Típicamente se observa:**
+- **Fines de semana:** Menos casos reportados (pero NO necesariamente menos contagios reales)
+- **Días laborales:** Más casos reportados (especialmente lunes)
+
+**¿Por qué ocurre esto?**
+- **Efecto administrativo:** Menos personal de laboratorio trabajando en fines de semana
+- **Retraso de reportes:** Casos del fin de semana se acumulan y reportan el lunes/martes
+- **Comportamiento:** Menos gente va al médico en fin de semana
 
 **Utilidad práctica:**
-- Modelos predictivos deben ajustar por día de la semana
-- No entrar en pánico por "bajadas" artificiales los domingos
-- Usar promedios de 7 días en lugar de datos diarios crudos
-- Periodistas y comunicadores deben reportar tendencias, no fluctuaciones diarias
+- **Modelos predictivos:** Deben incluir variables de día de la semana para ajustar
+- **Comunicación pública:** No alarmar por "bajadas" los domingos ni por "subidas" los lunes
+- **Análisis correcto:** Usar promedios de 7 días en lugar de datos diarios crudos
+- **Planificación hospitalaria:** Anticipar más diagnósticos acumulados los lunes
 
 ---
 
@@ -277,26 +330,28 @@ Muestra un sesgo importante en los datos: los fines de semana típicamente tiene
 
 ![Top 10 Estados Más Afectados](Output/figures/6_top_estados_casos.png)
 
-**Qué muestra:** Gráfica de barras horizontales mostrando los 10 estados con mayor número de casos totales acumulados.
+**¿Qué muestra?**
+Gráfica de barras horizontales mostrando los 10 estados con mayor número de casos totales acumulados.
 
-**Interpretación:**
-- Compara el impacto de la pandemia a nivel estatal
-- Estados más poblados y urbanos típicamente tienen más casos
-- Útil para análisis de políticas públicas estatales
+**¿Cómo interpretarla?**
+- **Orden:** De mayor a menor casos acumulados
+- **Longitud de barras:** Proporcional al número de casos
+- **Comparación:** Muestra diferencias relativas entre estados
 
-**¿Qué nos dice esta gráfica?**
-Escalada a nivel estatal, muestra qué estados fueron más golpeados por la pandemia. Factores que explican diferencias:
+**¿Qué nos dice?**
+Análisis a nivel estatal de la pandemia:
 
-- **Población:** Estados como California, Texas, Florida tienen más casos por ser más poblados
+**Factores que explican las diferencias:**
+- **Población:** California, Texas, Florida tienen más casos por ser más poblados
 - **Densidad urbana:** Estados con grandes metrópolis tienen más transmisión
 - **Conectividad:** Estados con aeropuertos principales recibieron casos más temprano
-- **Políticas locales:** Estados con restricciones más estrictas pueden tener menos casos
+- **Políticas locales:** Restricciones más o menos estrictas afectan los números
 
 **Utilidad práctica:**
-- Comparar efectividad de políticas estatales diferentes
-- Asignar recursos federales proporcionalmente
-- Estudios de caso: ¿por qué algunos estados lo hicieron mejor que otros?
-- Planificación para futuras pandemias a nivel estatal
+- **Comparar políticas:** Estudiar qué hicieron diferente estados con menos casos
+- **Asignación federal:** Distribuir recursos proporcionalmente a impacto
+- **Estudios de caso:** ¿Por qué algunos estados lo hicieron mejor?
+- **Planificación futura:** Aprender de experiencias estatales para próximas pandemias
 
 ---
 
@@ -305,27 +360,29 @@ Escalada a nivel estatal, muestra qué estados fueron más golpeados por la pand
 
 ![Tasa de Mortalidad por Estado](Output/figures/7_tasa_mortalidad_estados.png)
 
-**Qué muestra:** Top 15 estados con mayor porcentaje de muertes respecto a casos (tasa de letalidad).
+**¿Qué muestra?**
+Top 15 estados con mayor porcentaje de muertes respecto a casos (tasa de letalidad), con barras coloreadas por intensidad.
 
-**Interpretación:**
-- Identifica estados con mayor severidad relativa
-- Puede indicar diferencias en acceso a salud, demografía, o calidad de atención
-- Rojo más intenso = mayor tasa de mortalidad
+**¿Cómo interpretarla?**
+- **Porcentaje:** (Muertes / Casos) × 100
+- **Rojo más intenso:** Mayor tasa de mortalidad
+- **No es cantidad absoluta:** Es severidad relativa
 
-**¿Qué nos dice esta gráfica?**
-Esta gráfica es MÁS importante que el número absoluto de casos, porque muestra la **severidad relativa** de la pandemia. Un estado puede tener pocos casos pero alta mortalidad, indicando:
+**¿Qué nos dice?**
+Esta gráfica es MÁS IMPORTANTE que el número absoluto de casos porque muestra la **severidad relativa**:
 
-- **Sistema de salud saturado:** Hospitales sin capacidad
+**Un estado puede tener pocos casos pero alta mortalidad, indicando:**
+- **Sistema de salud saturado:** Hospitales sin capacidad para atender a todos
 - **Población vulnerable:** Mayor proporción de personas mayores o con comorbilidades
-- **Acceso limitado a tratamientos:** Menos acceso a antivirales, oxígeno, UCI
+- **Acceso limitado:** Menos acceso a antivirales, oxígeno, UCI
 - **Variantes más letales:** Algunas variantes del virus son más mortales
-- **Retraso en diagnóstico:** Casos detectados cuando ya están graves
+- **Diagnóstico tardío:** Casos detectados cuando ya están en estado grave
 
 **Utilidad práctica:**
-- Priorizar mejoras en infraestructura de salud en estados con alta letalidad
-- Investigar qué están haciendo bien los estados con baja letalidad
-- Dirigir vacunas y tratamientos a poblaciones vulnerables en estados críticos
-- Análisis económico: impacto en productividad y costos sanitarios
+- **Priorizar recursos:** Mejorar infraestructura de salud en estados con alta letalidad
+- **Aprender mejores prácticas:** Investigar qué hacen bien los estados con baja letalidad
+- **Dirigir tratamientos:** Enviar equipos médicos y medicamentos a estados críticos
+- **Análisis económico:** Medir impacto en productividad y costos sanitarios por estado
 
 ---
 
@@ -334,31 +391,39 @@ Esta gráfica es MÁS importante que el número absoluto de casos, porque muestr
 
 ![Evolución de Movilidad en el Tiempo](Output/figures/8_evolucion_movilidad.png)
 
-**Qué muestra:** Series temporales de cambios en movilidad para diferentes categorías (suavizado con promedio de 7 días).
+**¿Qué muestra?**
+Series temporales múltiples mostrando cambios porcentuales en movilidad para 6 categorías diferentes, suavizadas con promedio de 7 días.
 
-**Interpretación:**
-- Muestra cómo cambió el comportamiento durante la pandemia
-- Caídas pronunciadas = confinamientos/restricciones
-- Recuperación gradual = normalización de actividades
-- La línea residencial aumenta cuando otras disminuyen
+**¿Cómo interpretarla?**
+- **Línea 0%:** Nivel pre-pandemia (línea base)
+- **Por arriba de 0%:** Más actividad que antes de la pandemia
+- **Por debajo de 0%:** Menos actividad que antes de la pandemia
+- **Colores:** Cada categoría de movilidad tiene su color distintivo
 
-**¿Qué nos dice esta gráfica?**
-Esta es una "radiografía del comportamiento social" durante la pandemia. Cuenta la historia de cómo la gente cambió sus hábitos:
+**¿Qué nos dice?**
+Esta es una "RADIOGRAFÍA DEL COMPORTAMIENTO SOCIAL" durante la pandemia:
 
-**Fase 1 - Confinamiento:** Todas las líneas caen excepto residencial (la gente se queda en casa)
-**Fase 2 - Reapertura gradual:** Las líneas empiezan a subir, especialmente supermercados (esenciales)
-**Fase 3 - Nueva normalidad:** Patrones se estabilizan pero no vuelven al 100% pre-pandemia
+**Fase 1 - Confinamiento (inicio):**
+- Todas las líneas caen bruscamente excepto residencial
+- La gente se queda en casa (residencial sube)
+- Comercios, trabajo, transporte caen 50-80%
 
-**Detalles importantes:**
-- **Parques:** Muy variable (depende del clima y restricciones locales)
-- **Transporte público:** Recuperación lenta (la gente prefiere auto por miedo al contagio)
-- **Trabajo:** Muchas empresas adoptaron trabajo remoto permanente
+**Fase 2 - Reapertura gradual:**
+- Las líneas empiezan a subir progresivamente
+- Supermercados suben primero (esenciales)
+- Parques tienen alta variabilidad (clima)
+
+**Fase 3 - Nueva normalidad:**
+- Patrones se estabilizan pero NO vuelven al 100%
+- Trabajo nunca recupera niveles pre-pandemia (trabajo remoto permanente)
+- Transporte público tiene recuperación muy lenta (miedo al contagio)
 
 **Utilidad práctica:**
-- Empresas de transporte pueden planificar servicios según demanda real
-- Comercios pueden ajustar horarios y personal
-- Gobiernos locales pueden evaluar cumplimiento de restricciones
-- Economistas pueden medir impacto en sectores específicos (turismo, retail, etc.)
+- **Transporte:** Planificar servicios según demanda real observada
+- **Comercios:** Ajustar horarios y número de empleados según patrones
+- **Gobiernos:** Evaluar cumplimiento de restricciones (¿la gente realmente se quedó en casa?)
+- **Economistas:** Medir impacto en sectores específicos (turismo, retail, transporte)
+- **Urbanistas:** Diseñar ciudades más resilientes para futuras crisis
 
 ---
 
@@ -367,29 +432,32 @@ Esta es una "radiografía del comportamiento social" durante la pandemia. Cuenta
 
 ![Distribución por Día de la Semana](Output/figures/9_casos_dia_semana.png)
 
-**Qué muestra:** Dos gráficas mostrando promedio de casos y muertes para cada día de la semana (Lunes a Domingo).
+**¿Qué muestra?**
+Dos gráficas de barras mostrando promedio de casos (izquierda) y muertes (derecha) para cada día de la semana (Lunes a Domingo).
 
-**Interpretación:**
-- Identifica sesgos en reportes (ej: menos reportes los fines de semana)
-- Azul/Morado = días laborales, Rojo/Naranja = fines de semana
-- Útil para corregir modelos por efectos de calendario
+**¿Cómo interpretarla?**
+- **Días laborales:** Colores azul/morado (L-V)
+- **Fines de semana:** Colores rojo/naranja (S-D)
+- **Altura:** Promedio de casos/muertes para ese día en todo el año
 
-**¿Qué nos dice esta gráfica?**
-Detalla día por día el patrón semanal de reportes y casos reales. Observaciones típicas:
+**¿Qué nos dice?**
+Patrón semanal detallado de reportes:
 
-**Lunes/Martes:** Picos artificiales porque se reportan casos acumulados del fin de semana
-**Miércoles-Viernes:** Datos más estables y confiables
-**Sábado/Domingo:** Caída en reportes (menos personal administrativo trabajando)
+**Observaciones típicas:**
+- **Domingo:** MÍNIMO (menos reportes administrativos)
+- **Lunes/Martes:** PICOS artificiales (se reportan casos acumulados del fin de semana)
+- **Miércoles-Viernes:** Datos más estables y confiables
+- **Sábado:** Comienza a bajar
 
 **Diferencia entre casos y muertes:**
-- Casos: Mayor variabilidad semanal (más dependiente de reportes administrativos)
-- Muertes: Menos variabilidad (eventos más críticos se reportan más consistentemente)
+- **Casos:** Mayor variabilidad semanal (más dependiente de reportes administrativos)
+- **Muertes:** Menos variabilidad (eventos críticos se reportan más consistentemente)
 
 **Utilidad práctica:**
-- **Para analistas:** No comparar lunes con domingo, usar semanas completas
-- **Para modelos predictivos:** Incluir variables dummy de día de la semana
-- **Para comunicación pública:** Reportar promedios de 7 días, no picos/valles diarios
-- **Para planificación hospitalaria:** Anticipar que los lunes tendrán más diagnósticos acumulados
+- **Para analistas:** No comparar lunes con domingo directamente
+- **Para modelos:** Incluir variables dummy de día de la semana
+- **Para medios:** Reportar promedios de 7 días, no fluctuaciones diarias
+- **Para hospitales:** Anticipar más diagnósticos oficiales los lunes (no más casos reales)
 
 ---
 
@@ -398,36 +466,38 @@ Detalla día por día el patrón semanal de reportes y casos reales. Observacion
 
 ![Promedio Móvil de 7 Días](Output/figures/10_promedio_movil.png)
 
-**Qué muestra:** Dos gráficas con datos diarios (línea tenue) y promedio móvil de 7 días (línea gruesa) para casos y muertes.
+**¿Qué muestra?**
+Dos gráficas con datos diarios crudos (línea tenue con transparencia) y promedio móvil de 7 días (línea gruesa y sólida) para casos (arriba) y muertes (abajo).
 
-**Interpretación:**
-- Suaviza fluctuaciones diarias y resalta tendencias reales
-- Facilita identificar inicio/fin de olas
-- El promedio móvil es más confiable para análisis de tendencias
+**¿Cómo interpretarla?**
+- **Línea tenue:** Datos diarios reales (con todo el ruido)
+- **Línea gruesa:** Promedio de los últimos 7 días (tendencia suave)
+- **Cuando la gruesa sube:** Pandemia empeorando
+- **Cuando la gruesa baja:** Pandemia mejorando
 
-**¿Qué nos dice esta gráfica?**
-Esta es la versión "limpia" de los datos diarios. El promedio móvil de 7 días elimina:
+**¿Qué nos dice?**
+Esta es la versión "LIMPIA" de los datos. El promedio móvil de 7 días elimina:
 
-- **Ruido del fin de semana:** Ya no vemos bajadas artificiales los domingos
-- **Picos administrativos:** Los lunes ya no se ven inflados artificialmente
-- **Fluctuaciones aleatorias:** Eventos únicos (ej: un brote en una prisión) no distorsionan la tendencia
+- **Ruido de fin de semana:** Ya no vemos bajadas artificiales los domingos
+- **Picos administrativos:** Los lunes ya no se ven inflados
+- **Fluctuaciones aleatorias:** Eventos únicos no distorsionan la tendencia
 
 **¿Por qué 7 días?**
 - Captura un ciclo semanal completo
-- Es el estándar usado por CDC, OMS y medios de comunicación
-- Permite comparaciones internacionales
+- Es el estándar usado por CDC, OMS y medios internacionales
+- Permite comparaciones entre países
 
 **Cómo leerla:**
-- **Línea sube:** La pandemia está empeorando (ola creciente)
-- **Línea baja:** La pandemia está mejorando (ola en descenso)
+- **Línea sube:** Pandemia empeorando (ola creciente) 📈
+- **Línea baja:** Pandemia mejorando (ola descendente) 📉
 - **Línea plana:** Situación estable (meseta)
-- **Cambio de pendiente:** Momento crucial para decisiones de política pública
+- **Cambio de pendiente:** Momento crucial para decisiones de política
 
 **Utilidad práctica:**
 - **Gobiernos:** Decidir cuándo implementar o levantar restricciones
 - **Hospitales:** Planificar capacidad con 1-2 semanas de anticipación
-- **Medios de comunicación:** Reportar tendencias reales sin alarmar innecesariamente
-- **Individuos:** Evaluar riesgo personal y ajustar precauciones
+- **Medios:** Reportar tendencias reales sin alarmar por fluctuaciones diarias
+- **Individuos:** Evaluar riesgo personal según dirección de la tendencia
 
 ---
 
@@ -436,43 +506,39 @@ Esta es la versión "limpia" de los datos diarios. El promedio móvil de 7 días
 
 ![Mapa de Calor de Correlación](Output/figures/11_mapa_calor_correlacion.png)
 
-**Qué muestra:** Matriz de correlación entre todas las variables numéricas del dataset (casos, muertes, movilidad, fin de semana, feriados).
+**¿Qué muestra?**
+Matriz de correlación (heatmap) entre TODAS las variables numéricas del dataset: casos, muertes, movilidad, indicadores temporales.
 
-**Interpretación:**
-- **Rojo intenso:** Correlación positiva fuerte (cuando una sube, la otra también)
-- **Azul intenso:** Correlación negativa fuerte (cuando una sube, la otra baja)
-- **Blanco:** Sin correlación
-- Útil para identificar relaciones entre variables y validar hipótesis
-- Por ejemplo: casos acumulados y muertes acumuladas tienen correlación cercana a 1 (esperado)
+**¿Cómo interpretarla?**
+- **Rojo intenso:** Correlación positiva fuerte (+1.0) → cuando una sube, la otra también
+- **Azul intenso:** Correlación negativa fuerte (-1.0) → cuando una sube, la otra baja
+- **Blanco/neutro:** Sin correlación (0) → variables independientes
+- **Diagonal:** Siempre 1.0 (cada variable correlaciona perfectamente consigo misma)
+- **Números:** Coeficiente de correlación de Pearson (-1 a +1)
 
-**¿Qué nos dice esta gráfica?**
-Este es el "mapa de conexiones" entre todas las variables del dataset. Es una herramienta poderosa para:
+**¿Qué nos dice?**
+Este es el "MAPA DE CONEXIONES" entre todas las variables:
 
-**Validar hipótesis:**
-- ¿La movilidad realmente afecta los casos? → Ver correlación entre columnas de movilidad y daily_cases
-- ¿Los fines de semana afectan reportes? → Ver correlación entre is_weekend y daily_cases
+**Correlaciones esperadas (validan calidad de datos):**
+- **Casos acumulados ↔ Muertes acumuladas (~0.95):** Muy alta → más casos = más muertes ✓
+- **Daily_cases ↔ Daily_deaths:** Moderada → relación causa-efecto con retraso
 
-**Descubrir patrones no obvios:**
-- Correlaciones inesperadas pueden indicar factores causales ocultos
-- Falta de correlación donde esperábamos una puede indicar problemas en los datos
+**Correlaciones interesantes (insights):**
+- **Movilidad residencial ↔ Otros tipos de movilidad:** Negativa → quedarse en casa ↔ salir menos
+- **Daily_cases ↔ Movilidad en comercios:** Positiva → más visitas = más contagios
+- **Daily_cases ↔ Movilidad residencial:** Negativa → quedarse en casa = menos casos
 
-**Cómo leerlo:**
-- **Diagonal (1.0):** Cada variable perfectamente correlacionada consigo misma
-- **Casos acumulados ↔ Muertes acumuladas (~0.95):** Fuerte correlación (más casos = más muertes)
-- **Movilidad residencial ↔ Otros tipos de movilidad (negativa):** Cuando aumenta tiempo en casa, disminuye movilidad externa
-- **Daily_cases ↔ Movilidad en comercios (positiva):** Más visitas = más contagios
-
-**Correlaciones importantes a buscar:**
-1. **Casos vs Movilidad:** ¿Qué actividades tienen mayor correlación con contagios?
-2. **Casos vs Fines de semana:** ¿Hay sesgo de reporte?
-3. **Casos vs Días feriados:** ¿Los feriados afectan los datos?
+**Correlaciones para investigar:**
+- **Is_weekend ↔ Daily_cases:** Si es negativa, confirma sesgo de reporte
+- **Is_holiday ↔ Daily_cases:** Similar al fin de semana
+- **Movilidad trabajo ↔ Daily_cases:** Mide impacto del trabajo remoto
 
 **Utilidad práctica:**
-- **Científicos de datos:** Selección de variables para modelos predictivos
-- **Epidemiólogos:** Identificar factores de riesgo principales
-- **Políticos:** Decidir qué restricciones implementar (enfocar en actividades con alta correlación)
-- **Investigadores:** Generar nuevas hipótesis para estudios profundos
-- **Verificación de calidad:** Detectar datos anómalos (correlaciones que no tienen sentido)
+- **Científicos de datos:** Seleccionar variables para modelos predictivos (evitar multicolinealidad)
+- **Epidemiólogos:** Identificar factores de riesgo principales para intervención
+- **Políticos:** Decidir qué restricciones implementar (enfocarse en alta correlación)
+- **Investigadores:** Generar hipótesis nuevas basadas en correlaciones inesperadas
+- **Verificación de calidad:** Detectar datos anómalos (correlaciones imposibles)
 
 ---
 
@@ -480,83 +546,82 @@ Este es el "mapa de conexiones" entre todas las variables del dataset. Es una he
 
 Después de procesar y visualizar este dataset, podemos concluir:
 
-1. **✅ La movilidad SÍ afecta los contagios**
-   - Existe correlación clara entre aumento en actividades públicas y casos
-   - El transporte público muestra la correlación más fuerte
-   - Quedarse en casa (aumento en movilidad residencial) correlaciona con menos casos
+### 1. ✅ La movilidad SÍ afecta los contagios
+- Correlación clara entre actividades públicas y casos
+- Transporte público muestra la correlación más fuerte
+- Quedarse en casa correlaciona negativamente con casos
 
-2. **✅ Las muertes siguen a los casos con 2-3 semanas de retraso**
-   - Patrón consistente útil para predicción
-   - Permite a hospitales prepararse con anticipación
-   - Crucial para planificación de recursos médicos
+### 2. ✅ Las muertes siguen a los casos con 2-3 semanas de retraso
+- Patrón consistente y predecible
+- Permite a hospitales prepararse con anticipación
+- Crucial para planificación de recursos médicos
 
-3. **✅ Los datos tienen sesgo de reporte**
-   - Los fines de semana muestran menos casos (efecto administrativo)
-   - Los lunes tienen picos artificiales (acumulación del fin de semana)
-   - Es esencial usar promedios móviles de 7 días
+### 3. ✅ Los datos tienen sesgo de reporte
+- Fines de semana muestran menos casos (efecto administrativo)
+- Lunes tienen picos artificiales (acumulación)
+- Esencial usar promedios móviles de 7 días
 
-4. **✅ La tasa de mortalidad varía significativamente por región**
-   - No todos los estados experimentaron la misma severidad
-   - Factores: demografía, sistema de salud, acceso a tratamientos
-   - Importante para asignación equitativa de recursos
+### 4. ✅ La tasa de mortalidad varía por región
+- No todos los estados experimentaron la misma severidad
+- Factores: demografía, sistema de salud, acceso a tratamientos
+- Importante para asignación equitativa de recursos
 
-5. **✅ El comportamiento social cambió drásticamente**
-   - Las gráficas de movilidad muestran un "antes y después" claro
-   - El trabajo remoto se adoptó masivamente
-   - El transporte público nunca recuperó niveles pre-pandemia
+### 5. ✅ El comportamiento social cambió drásticamente
+- Gráficas de movilidad muestran "antes y después" claro
+- Trabajo remoto se adoptó masivamente
+- Transporte público nunca recuperó niveles pre-pandemia
 
-6. **✅ Los promedios móviles son esenciales**
-   - Los datos diarios crudos tienen demasiado ruido
-   - Ventanas de 7 días capturan ciclos semanales
-   - Facilitan identificación de tendencias reales
+### 6. ✅ Los promedios móviles son esenciales
+- Datos diarios crudos tienen demasiado ruido
+- Ventanas de 7 días capturan ciclos semanales
+- Facilitan identificación de tendencias reales
 
 ---
 
-## 📈 Casos de Uso Reales
+## 💡 Recomendaciones para Interpretar los Datos
 
-### 🏥 Sector Salud
-- **Hospitales:** Planificar capacidad de UCI y personal según tendencias
-- **Departamentos de Salud Pública:** Diseñar campañas de vacunación y comunicación
-- **Investigadores médicos:** Estudiar patrones de transmisión y efectividad de tratamientos
+### 1. Siempre usa promedios móviles
+- Los datos diarios tienen mucho ruido administrativo
+- Ventana de 7 días es el estándar internacional
+- Facilita ver tendencias reales vs. fluctuaciones
 
-### 🏛️ Gobierno y Política Pública
-- **Tomadores de decisiones:** Evaluar cuándo implementar/levantar restricciones
-- **Planificadores urbanos:** Diseñar ciudades más resilientes a pandemias
-- **Gestión de emergencias:** Preparación para futuras crisis sanitarias
+### 2. Ten en cuenta el sesgo de reporte
+- Fines de semana: menos reportes
+- Lunes: picos artificiales
+- Compara semanas completas, no días individuales
 
-### 📚 Educación e Investigación
-- **Universidades:** Material didáctico para cursos de epidemiología, ciencia de datos, salud pública
-- **Estudiantes:** Proyectos de tesis sobre análisis de datos, machine learning aplicado
-- **Investigadores:** Publicaciones académicas sobre correlación movilidad-contagios
+### 3. Contexto es clave
+- Considera población de cada región
+- Tasas per cápita > números absolutos
+- Factores locales afectan resultados
 
-### 💼 Sector Empresarial
-- **Comercios:** Entender patrones de consumo durante crisis
-- **Transporte:** Planificar servicios según demanda real
-- **Seguros:** Evaluar riesgos y ajustar primas
-- **Empresas tech:** Desarrollar soluciones de monitoreo y predicción
+### 4. Correlación ≠ Causalidad
+- Movilidad correlaciona con casos, pero hay otros factores
+- Usa análisis multivariable para conclusiones robustas
+- Considera variables confusoras (clima, política, economía)
 
-### 📊 Ciencia de Datos y Analytics
-- **Modelos predictivos:** Entrenar algoritmos de machine learning para predecir olas
-- **Análisis de series temporales:** Estudiar patrones estacionales y cíclicos
-- **Visualización de datos:** Ejemplos de buenas prácticas en gráficas explicativas
+### 5. Valida tus hipótesis
+- Usa múltiples gráficas para confirmar patrones
+- Compara diferentes períodos temporales
+- Busca consistencia en distintos niveles geográficos
 
 ---
 
 ## 📖 Documentación Relacionada
 
-- **[README.md](README.md)** - Documentación técnica del proyecto, arquitectura del código, módulos y pipeline ETL
+- 📖 **[README.md](README.md)** - Documentación técnica del código, explicación de módulos, guía para desarrolladores
 
 ---
 
 ## 📊 Cómo Generar las Visualizaciones
 
-### Opción 1: Ejecutar el pipeline completo
+### Opción 1: Pipeline completo
 ```bash
 python pipeline.py
 ```
-Esto genera automáticamente todas las 11 gráficas en `Output/figures/`
+Genera todas las 11 gráficas automáticamente en `Output/figures/`
 
-### Opción 2: Generar solo las visualizaciones
+### Opción 2: Solo visualizaciones
 ```bash
 python -m Vizualize.plot --input "Output/IntegratedData_cleaned.csv" --outdir "Output/figures"
 ```
@@ -570,35 +635,6 @@ generar_todas_las_graficas(
     output_dir="Output/figures"
 )
 ```
-
----
-
-## 💡 Recomendaciones para Interpretar los Datos
-
-### 1. Siempre usa promedios móviles
-- Los datos diarios tienen mucho ruido
-- Ventana de 7 días es el estándar internacional
-- Facilita ver tendencias reales
-
-### 2. Ten en cuenta el sesgo de reporte
-- Los fines de semana tienen menos reportes
-- Los lunes tienen picos artificiales
-- Compara semanas completas, no días individuales
-
-### 3. Contexto es clave
-- Considera la población de cada región
-- Tasas son más informativas que números absolutos
-- Compara tasas per cápita, no valores brutos
-
-### 4. Correlación no implica causalidad
-- La movilidad correlaciona con casos, pero hay otros factores
-- Usa análisis multivariable para conclusiones robustas
-- Considera variables confusoras
-
-### 5. Valida tus hipótesis
-- Usa múltiples gráficas para confirmar patrones
-- Compara diferentes periodos temporales
-- Busca consistencia en distintos niveles geográficos
 
 ---
 

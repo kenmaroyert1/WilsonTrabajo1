@@ -1,6 +1,6 @@
 # WilsonTrabajo1 - Pipeline ETL para Análisis de COVID-19
 
-## 🚀 Inicio Rápido (Quick Start)
+## 🚀 Inicio Rápido
 
 ### Requisitos Previos
 - Python 3.7 o superior
@@ -27,36 +27,20 @@ Después de ejecutar `pipeline.py`, obtendrás:
 - ✔️ 11 gráficas profesionales en: `Output/figures/`
 - ✔️ Agregaciones: `Output/agregado_nacional.csv`, `top_estados.csv`, `top_condados.csv`
 
-### 📊 Ejecutar Solo Visualizaciones
-
-Si ya tienes los datos procesados:
-```python
-from Vizualize.plot import *
-from Config.Config import OUTPUT_DIR, FIGURES_DIR
-
-# Generar todas las gráficas
-crear_serie_temporal_casos(OUTPUT_DIR / "IntegratedData_transformed.csv")
-crear_mapa_calor_movilidad(OUTPUT_DIR / "IntegratedData_transformed.csv")
-# ... más funciones disponibles
-```
-
 ---
 
-## 📖 Descripción del Proyecto
+## 📖 Sobre Este Proyecto
 
-Este proyecto implementa un **pipeline ETL completo** para el análisis de datos de COVID-19 en Estados Unidos, combinando información epidemiológica (casos y muertes) con datos de movilidad poblacional.
+Este proyecto implementa un **pipeline ETL completo** para análisis de datos de COVID-19, procesando más de 935,000 registros con información epidemiológica y de movilidad de Estados Unidos.
 
-### 🎯 Objetivo
-Procesar, analizar y visualizar grandes volúmenes de datos sobre la pandemia para entender la relación entre los cambios en patrones de movilidad y la propagación del virus.
-
-### 📚 Documentación Adicional
-- **[DATASET_INFO.md](DATASET_INFO.md)** - Información detallada sobre el dataset, visualizaciones, casos de uso e interpretación de gráficas
+**Documentación adicional:**
+- 📊 **[DATASET_INFO.md](DATASET_INFO.md)** - Para qué sirve el dataset, visualizaciones y casos de uso
 
 ---
 
 ## 🔧 Arquitectura del Pipeline ETL
 
-El proyecto sigue una arquitectura modular con 5 etapas principales:
+El proyecto sigue una arquitectura modular de 5 etapas:
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
@@ -65,38 +49,22 @@ El proyecto sigue una arquitectura modular con 5 etapas principales:
 └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-### 1. **Extract** - Extracción de Datos
-- Lectura eficiente de archivos CSV grandes (77MB+)
-- Procesamiento por chunks para optimizar memoria
-- Múltiples métodos de extracción (completo, por partes, filtrado)
+### Resumen de Etapas
 
-### 2. **Clean** - Limpieza de Datos
-- Normalización de nombres de columnas
-- Eliminación de duplicados y valores nulos
-- Streaming para archivos grandes (>50MB)
-
-### 3. **Transform** - Transformación y Análisis
-- Cálculo de métricas derivadas (tasas, promedios móviles)
-- Agregaciones temporales y geográficas
-- Detección y manejo de outliers
-
-### 4. **Load** - Persistencia de Datos
-- Guardado en múltiples formatos (CSV, Excel, JSON, Parquet)
-- Backups automáticos con timestamp
-- Gestión de metadatos
-
-### 5. **Visualize** - Generación de Gráficas
-- 11 visualizaciones profesionales en español
-- Gráficas de alta resolución (300 DPI)
-- Interpretaciones detalladas
+1. **Extract** - Lectura eficiente de CSV (77MB+) con procesamiento por chunks
+2. **Clean** - Normalización de columnas, eliminación de duplicados
+3. **Transform** - Cálculo de métricas derivadas y agregaciones
+4. **Load** - Guardado en múltiples formatos con backups
+5. **Visualize** - 11 gráficas profesionales en español (300 DPI)
 
 ---
 
-## 📦 Módulos Implementados
+## 📦 Explicación del Código - Módulos
 
-### ⚙️ **Config/Config.py** - Configuración Centralizada
+### ⚙️ Config/Config.py - Configuración Centralizada
 
-**Propósito:** Gestionar toda la configuración del proyecto desde un solo lugar.
+**¿Qué hace?**
+Almacena TODAS las configuraciones del proyecto en un solo lugar.
 
 **Contiene:**
 ```python
@@ -107,108 +75,88 @@ OUTPUT_DIR = PROJECT_ROOT / "Output"
 FIGURES_DIR = OUTPUT_DIR / "figures"
 
 # Parámetros de procesamiento
-CHUNK_SIZE = 100000  # Filas por chunk para archivos grandes
+CHUNK_SIZE = 100000  # Filas por chunk
 DATE_COLUMN = 'date'
-FIGSIZE = (14, 8)
-DPI = 300
 
 # Configuración de visualización
+FIGSIZE = (14, 8)
+DPI = 300
 COLOR_PALETTE = 'viridis'
 STYLE = 'seaborn-v0_8-darkgrid'
 ```
 
 **Funciones principales:**
-- `setup_directories()`: Crea directorios necesarios
-- `get_config_summary()`: Muestra resumen de configuración
-- `validate_paths()`: Valida existencia de archivos/carpetas
+- `setup_directories()` - Crea directorios necesarios
+- `get_config_summary()` - Muestra resumen de configuración
+- `validate_paths()` - Valida existencia de archivos
 
-**Cuándo usarlo:**
-- Importar constantes en otros módulos
-- Cambiar rutas de archivos
-- Ajustar parámetros de procesamiento
+**¿Cuándo se usa?**
+- Al inicio del pipeline para configurar rutas
+- Cuando otros módulos necesitan importar constantes
+- Para cambiar parámetros globalmente sin editar múltiples archivos
 
 ---
 
-### 📥 **Extract/Extract.py** - Extracción de Datos
+### 📥 Extract/Extract.py - Extracción de Datos
 
-**Propósito:** Proporcionar múltiples formas de leer datos del CSV inicial.
+**¿Qué hace?**
+Proporciona múltiples formas de leer el archivo CSV de 77MB sin consumir toda la RAM.
 
-**Clase:** `DataExtractor`
+**Clase Principal:** `DataExtractor`
 
-**Métodos disponibles:**
+**7 Métodos de Extracción:**
 
 1. **`extract_full()`** - Carga completa en memoria
-   - Usa cuando: Tienes suficiente RAM (>8GB)
-   - Retorna: DataFrame completo
+   ```python
+   extractor = DataExtractor("IntegratedData.csv")
+   df = extractor.extract_full()
+   ```
 
-2. **`extract_chunks(chunk_size=100000)`** - Iterador por chunks
-   - Usa cuando: Archivo muy grande o poca RAM
-   - Retorna: Iterador de DataFrames
+2. **`extract_chunks(chunk_size=100000)`** - Procesar por bloques
+   ```python
+   for chunk in extractor.extract_chunks(chunk_size=50000):
+       procesar(chunk)  # Procesa 50,000 filas a la vez
+   ```
 
 3. **`extract_columns(columns)`** - Solo columnas específicas
-   - Usa cuando: Solo necesitas algunas columnas
-   - Retorna: DataFrame con columnas seleccionadas
+   ```python
+   df = extractor.extract_columns(['date', 'cases', 'deaths'])
+   ```
 
 4. **`extract_sample(frac=0.1)`** - Muestreo aleatorio
-   - Usa cuando: Pruebas rápidas con 10% de datos
-   - Retorna: DataFrame con muestra aleatoria
+   ```python
+   df_test = extractor.extract_sample(frac=0.1)  # 10% de datos
+   ```
 
 5. **`extract_by_state(states)`** - Filtrar por estados
-   - Usa cuando: Solo necesitas datos de ciertos estados
-   - Retorna: DataFrame filtrado
+   ```python
+   df_ca = extractor.extract_by_state(['California', 'Texas'])
+   ```
 
-6. **`extract_date_range(start, end)`** - Filtrar por fechas
-   - Usa cuando: Solo necesitas un período específico
-   - Retorna: DataFrame con fechas en el rango
+6. **`extract_date_range(start, end)`** - Rango de fechas
+   ```python
+   df = extractor.extract_date_range('2021-03-01', '2021-03-31')
+   ```
 
 7. **`get_info()`** - Información sin cargar datos
-   - Usa cuando: Quieres saber tamaño, columnas sin usar memoria
-   - Retorna: Diccionario con metadatos
+   ```python
+   info = extractor.get_info()
+   print(f"Tamaño: {info['size_mb']} MB")
+   ```
 
-**Ejemplo de uso:**
-```python
-from Extract.Extract import DataExtractor
-
-extractor = DataExtractor("IntegratedData.csv")
-
-# Opción 1: Cargar todo
-df_completo = extractor.extract_full()
-
-# Opción 2: Procesar por chunks (archivos grandes)
-for chunk in extractor.extract_chunks(chunk_size=50000):
-    procesar(chunk)
-
-# Opción 3: Solo datos de California
-df_california = extractor.extract_by_state(['California'])
-```
+**¿Por qué usar chunks?**
+- Archivos grandes no caben en memoria RAM
+- Permite procesar datasets de 10GB+ con solo 2GB de RAM
+- Más eficiente para operaciones secuenciales
 
 ---
 
-### 🧹 **Extract/Clean/Clean.py** - Limpieza de Datos
+### 🧹 Extract/Clean/Clean.py - Limpieza de Datos
 
-**Propósito:** Limpiar y normalizar datos crudos para análisis.
+**¿Qué hace?**
+Limpia y normaliza datos crudos automáticamente usando procesamiento por chunks.
 
-**Qué hace:**
-
-1. **Normalización de columnas:**
-   - `Cases` → `cases`
-   - `Daily Cases` → `daily_cases`
-
-2. **Limpieza de valores:**
-   - Quita espacios en blanco
-   - Convierte valores vacíos a NaN
-   - Parsea fechas automáticamente
-
-3. **Eliminación de duplicados:**
-   - Identifica y elimina filas duplicadas
-   - Mantiene primera ocurrencia
-
-4. **Procesamiento por chunks:**
-   - Lee en bloques de 100,000 filas
-   - Procesa cada bloque independientemente
-   - Puede procesar archivos de 10GB+ con 2GB de RAM
-
-**Función principal:**
+**Función Principal:**
 ```python
 from Extract.Clean.Clean import clean_csv
 
@@ -218,233 +166,212 @@ clean_csv(
 )
 ```
 
-**Funciones auxiliares:**
-- `normalize_column_name(col)`: Normaliza nombre de columna
-- `clean_chunk(chunk)`: Limpia un chunk de datos
-- `remove_duplicates_chunked()`: Elimina duplicados en streaming
+**Proceso de Limpieza:**
 
----
+1. **Normalización de columnas**
+   - `Cases` → `cases` (minúsculas)
+   - `Daily Cases` → `daily_cases` (sin espacios)
+   - `2021-date` → `date` (sin prefijos)
 
-### 🔄 **Transform/Transform.py** - Transformación de Datos
+2. **Limpieza de valores**
+   - Elimina espacios: `" Texas "` → `"Texas"`
+   - Convierte vacíos a NaN: `""` → `NaN`
+   - Parsea fechas: `"2021-01-01"` → `datetime`
 
-**Propósito:** Calcular métricas derivadas y realizar análisis avanzado.
+3. **Eliminación de duplicados**
+   - Detecta filas idénticas
+   - Mantiene primera ocurrencia
+   - Usa streaming para no cargar todo en memoria
 
-**Clase:** `DataTransformer`
+4. **Eliminación de filas vacías**
+   - Detecta filas donde TODAS las columnas son NaN
+   - Las elimina para reducir tamaño del archivo
 
-**Transformaciones disponibles:**
-
-1. **Promedios Móviles**
-   ```python
-   df = transformer.add_moving_average(df, column='daily_cases', window=7)
-   # Añade columna: daily_cases_ma7
-   ```
-
-2. **Tasas Derivadas**
-   ```python
-   df = transformer.calculate_mortality_rate(df)
-   # Añade: mortality_rate (muertes/casos * 100)
-   
-   df = transformer.calculate_growth_rate(df, column='cases')
-   # Añade: cases_growth_rate
-   ```
-
-3. **Agregaciones**
-   ```python
-   # Agregación por fecha
-   df_daily = transformer.aggregate_by_date(df)
-   
-   # Agregación por estado
-   df_state = transformer.aggregate_by_state(df)
-   
-   # Agregación por condado
-   df_county = transformer.aggregate_by_county(df)
-   ```
-
-4. **Rankings**
-   ```python
-   # Top 10 estados con más casos
-   top_states = transformer.get_top_states(df, metric='cases', n=10)
-   
-   # Top 10 condados con más muertes
-   top_counties = transformer.get_top_counties(df, metric='deaths', n=10)
-   ```
-
-5. **Correlaciones**
-   ```python
-   # Matriz de correlación
-   corr_matrix = transformer.calculate_correlation(df, columns=['cases', 'deaths', 'mobility'])
-   ```
-
-6. **Features Temporales**
-   ```python
-   df = transformer.add_temporal_features(df)
-   # Añade: year, month, week, day_of_week, quarter, is_weekend
-   ```
-
-7. **Normalización**
-   ```python
-   # Min-Max (0-1)
-   df = transformer.normalize_minmax(df, columns=['cases', 'deaths'])
-   
-   # Z-score (media=0, std=1)
-   df = transformer.normalize_zscore(df, columns=['cases', 'deaths'])
-   ```
-
-8. **Detección de Outliers**
-   ```python
-   # Método IQR (InterQuartile Range)
-   df = transformer.remove_outliers_iqr(df, column='cases')
-   
-   # Método Z-score
-   df = transformer.remove_outliers_zscore(df, column='cases', threshold=3)
-   ```
-
-**Ejemplo completo:**
+**¿Cómo funciona el procesamiento por chunks?**
 ```python
-from Transform.Transform import DataTransformer
-import pandas as pd
-
-transformer = DataTransformer()
-df = pd.read_csv("Output/IntegratedData_cleaned.csv")
-
-# Aplicar múltiples transformaciones
-df = transformer.add_temporal_features(df)
-df = transformer.add_moving_average(df, 'daily_cases', window=7)
-df = transformer.calculate_mortality_rate(df)
-
-# Guardar datos transformados
-df.to_csv("Output/IntegratedData_transformed.csv", index=False)
+# Lee 100,000 filas a la vez
+for chunk in pd.read_csv(input_csv, chunksize=100000):
+    chunk_limpio = clean_chunk(chunk)
+    chunk_limpio.to_csv(output_csv, mode='append')
 ```
 
+**Ventajas:**
+- Procesa archivos de cualquier tamaño
+- Memoria constante (no crece con el archivo)
+- Más rápido que cargar todo en memoria
+
 ---
 
-### 💾 **Load/Load.py** - Persistencia de Datos
+### 🔄 Transform/Transform.py - Transformación de Datos
 
-**Propósito:** Guardar y cargar datos procesados en múltiples formatos.
+**¿Qué hace?**
+Calcula métricas derivadas, agrega datos y realiza análisis estadístico.
 
-**Clase:** `DataLoader`
+**Clase Principal:** `DataTransformer`
 
-**Formatos soportados:**
-- CSV (`.csv`)
-- Excel (`.xlsx`)
-- JSON (`.json`)
-- Parquet (`.parquet`)
+**Funciones de Transformación:**
 
-**Funciones principales:**
+#### 1. Promedios Móviles
+```python
+transformer = DataTransformer()
+df = transformer.add_moving_average(df, column='daily_cases', window=7)
+# Añade columna: daily_cases_ma7 (promedio de 7 días)
+```
 
-1. **Guardar datos**
-   ```python
-   from Load.Load import DataLoader
-   
-   loader = DataLoader(output_dir="Output")
-   
-   # Guardar en CSV
-   loader.save_csv(df, "datos_procesados.csv")
-   
-   # Guardar en Excel con formato
-   loader.save_excel(df, "datos_procesados.xlsx")
-   
-   # Guardar en JSON
-   loader.save_json(df, "datos_procesados.json")
-   
-   # Guardar en Parquet (más eficiente)
-   loader.save_parquet(df, "datos_procesados.parquet")
-   ```
+**¿Para qué?** Suavizar fluctuaciones diarias y ver tendencias reales.
 
-2. **Cargar datos**
-   ```python
-   # Cargar desde CSV
-   df = loader.load_csv("datos_procesados.csv")
-   
-   # Cargar desde Excel
-   df = loader.load_excel("datos_procesados.xlsx")
-   
-   # Cargar desde JSON
-   df = loader.load_json("datos_procesados.json")
-   
-   # Cargar desde Parquet
-   df = loader.load_parquet("datos_procesados.parquet")
-   ```
+#### 2. Tasas Derivadas
+```python
+# Tasa de mortalidad
+df = transformer.calculate_mortality_rate(df)
+# Añade: mortality_rate = (muertes / casos) * 100
 
-3. **Guardado por chunks (archivos grandes)**
+# Tasa de crecimiento
+df = transformer.calculate_growth_rate(df, column='cases')
+# Añade: cases_growth_rate = cambio porcentual diario
+```
+
+**¿Para qué?** Comparar severidad entre regiones sin depender del tamaño poblacional.
+
+#### 3. Agregaciones
+```python
+# Agregación por fecha (suma nacional diaria)
+df_nacional = transformer.aggregate_by_date(df)
+
+# Agregación por estado
+df_estados = transformer.aggregate_by_state(df)
+
+# Agregación por condado
+df_condados = transformer.aggregate_by_county(df)
+```
+
+**¿Para qué?** Análisis a diferentes niveles geográficos.
+
+#### 4. Rankings
+```python
+# Top 10 estados con más casos
+top_10 = transformer.get_top_states(df, metric='cases', n=10)
+
+# Top 10 condados con más muertes
+top_10_condados = transformer.get_top_counties(df, metric='deaths', n=10)
+```
+
+**¿Para qué?** Identificar zonas más afectadas.
+
+#### 5. Correlaciones
+```python
+# Matriz de correlación
+corr = transformer.calculate_correlation(
+    df, 
+    columns=['cases', 'deaths', 'mobility_retail', 'mobility_transit']
+)
+```
+
+**¿Para qué?** Entender relaciones entre variables (movilidad → casos).
+
+#### 6. Features Temporales
+```python
+df = transformer.add_temporal_features(df)
+# Añade: year, month, week, day_of_week, quarter, is_weekend
+```
+
+**¿Para qué?** Detectar patrones estacionales y sesgos de reporte.
+
+#### 7. Normalización
+```python
+# Min-Max (escala 0-1)
+df = transformer.normalize_minmax(df, columns=['cases'])
+
+# Z-score (media=0, desv=1)
+df = transformer.normalize_zscore(df, columns=['cases'])
+```
+
+**¿Para qué?** Machine learning y comparación entre variables con diferentes escalas.
+
+#### 8. Detección de Outliers
+```python
+# Método IQR (rango intercuartil)
+df = transformer.remove_outliers_iqr(df, column='cases')
+
+# Método Z-score (desviaciones estándar)
+df = transformer.remove_outliers_zscore(df, column='cases', threshold=3)
+```
+
+**¿Para qué?** Eliminar datos anómalos que distorsionan análisis.
+
+---
+
+### 💾 Load/Load.py - Persistencia de Datos
+
+**¿Qué hace?**
+Guarda y carga datos procesados en múltiples formatos con backups automáticos.
+
+**Clase Principal:** `DataLoader`
+
+**Formatos Soportados:**
+- CSV (`.csv`) - Compatible, liviano
+- Excel (`.xlsx`) - Para usuarios no técnicos
+- JSON (`.json`) - APIs y web
+- Parquet (`.parquet`) - Más eficiente (compresión y velocidad)
+
+**Guardar Datos:**
+```python
+loader = DataLoader(output_dir="Output")
+
+# CSV
+loader.save_csv(df, "datos_procesados.csv")
+
+# Excel con formato
+loader.save_excel(df, "reporte.xlsx")
+
+# JSON
+loader.save_json(df, "api_data.json")
+
+# Parquet (más rápido, menor tamaño)
+loader.save_parquet(df, "datos.parquet")
+```
+
+**Cargar Datos:**
+```python
+df = loader.load_csv("datos_procesados.csv")
+df = loader.load_excel("reporte.xlsx")
+df = loader.load_json("api_data.json")
+df = loader.load_parquet("datos.parquet")
+```
+
+**Funciones Avanzadas:**
+
+1. **Guardado por chunks (archivos grandes)**
    ```python
    loader.save_csv_chunks(df, "datos_grandes.csv", chunk_size=100000)
    ```
 
-4. **Backups automáticos**
+2. **Backups automáticos**
    ```python
    loader.save_with_backup(df, "datos_importantes.csv")
    # Crea: datos_importantes_backup_20260205_143022.csv
    ```
 
-5. **Guardar metadatos**
+3. **Guardar metadatos**
    ```python
-   loader.save_metadata(df, "datos_procesados.csv")
-   # Crea: datos_procesados_metadata.json con info del dataset
+   loader.save_metadata(df, "datos.csv")
+   # Crea: datos_metadata.json con info del dataset
    ```
 
-6. **Gestión de archivos**
+4. **Listar archivos**
    ```python
-   # Listar archivos en Output/
-   files = loader.list_files()
-   
-   # Obtener información de un archivo
-   info = loader.get_file_info("datos_procesados.csv")
+   files = loader.list_files()  # Lista todos los archivos en Output/
+   info = loader.get_file_info("datos.csv")  # Info de un archivo
    ```
 
 ---
 
-### 📊 **Vizualize/plot.py** - Generación de Visualizaciones
+### 📊 Vizualize/plot.py - Generación de Visualizaciones
 
-**Propósito:** Generar 11 gráficas profesionales en español para análisis de COVID-19.
+**¿Qué hace?**
+Genera automáticamente 11 gráficas profesionales en español de alta resolución.
 
-**Funciones de visualización:**
-
-1. **`crear_serie_temporal_casos(csv_path)`**
-   - Evolución temporal de casos y muertes (eje dual)
-   - Archivo: `1_evolucion_casos_muertes.png`
-
-2. **`crear_top_condados(csv_path)`**
-   - Top 10 condados con más casos
-   - Archivo: `2_top_condados_casos.png`
-
-3. **`crear_scatter_casos_muertes(csv_path)`**
-   - Relación casos vs muertes (scatter + tendencia)
-   - Archivo: `3_casos_vs_muertes.png`
-
-4. **`crear_correlacion_movilidad(csv_path)`**
-   - Correlación movilidad vs casos
-   - Archivo: `4_movilidad_correlacion.png`
-
-5. **`crear_comparacion_dias(csv_path)`**
-   - Comparación días laborales vs fines de semana
-   - Archivo: `5_comparacion_dias.png`
-
-6. **`crear_top_estados(csv_path)`**
-   - Top 10 estados más afectados
-   - Archivo: `6_top_estados_casos.png`
-
-7. **`crear_tasa_mortalidad_estados(csv_path)`**
-   - Tasa de mortalidad por estado (top 15)
-   - Archivo: `7_tasa_mortalidad_estados.png`
-
-8. **`crear_evolucion_movilidad(csv_path)`**
-   - Evolución temporal de movilidad (todas las categorías)
-   - Archivo: `8_evolucion_movilidad.png`
-
-9. **`crear_distribucion_dia_semana(csv_path)`**
-   - Distribución de casos y muertes por día de semana
-   - Archivo: `9_casos_dia_semana.png`
-
-10. **`crear_promedio_movil(csv_path)`**
-    - Promedio móvil de 7 días (casos y muertes)
-    - Archivo: `10_promedio_movil.png`
-
-11. **`crear_mapa_calor_correlacion(csv_path)`**
-    - Matriz de correlación completa (heatmap)
-    - Archivo: `11_mapa_calor_correlacion.png`
-
-**Generar todas las gráficas:**
+**Generar Todas las Gráficas:**
 ```python
 from Vizualize.plot import generar_todas_las_graficas
 
@@ -454,34 +381,50 @@ generar_todas_las_graficas(
 )
 ```
 
-**O ejecutar desde línea de comandos:**
+**O desde línea de comandos:**
 ```bash
 python -m Vizualize.plot --input "Output/IntegratedData_cleaned.csv" --outdir "Output/figures"
 ```
 
-**Características:**
-- Alta resolución (300 DPI)
+**11 Funciones de Visualización:**
+
+1. `crear_serie_temporal_casos()` - Evolución temporal nacional
+2. `crear_top_condados()` - Top 10 condados
+3. `crear_scatter_casos_muertes()` - Relación casos vs muertes
+4. `crear_correlacion_movilidad()` - Correlación movilidad-casos
+5. `crear_comparacion_dias()` - Días laborales vs fines de semana
+6. `crear_top_estados()` - Top 10 estados
+7. `crear_tasa_mortalidad_estados()` - Tasa de mortalidad por estado
+8. `crear_evolucion_movilidad()` - Series temporales de movilidad
+9. `crear_distribucion_dia_semana()` - Distribución por día
+10. `crear_promedio_movil()` - Promedio móvil de 7 días
+11. `crear_mapa_calor_correlacion()` - Matriz de correlación
+
+**Características de las gráficas:**
+- Alta resolución (300 DPI) - Listas para publicación
 - Estilo profesional con seaborn
 - Todas las etiquetas en español
-- Colores optimizados para publicación
-- Tamaños de figura configurables
+- Colores optimizados y accesibles
+- Guardado automático en PNG
+
+**Ejemplo de uso individual:**
+```python
+from Vizualize.plot import crear_serie_temporal_casos
+
+crear_serie_temporal_casos(
+    csv_path="Output/IntegratedData_transformed.csv",
+    output_path="Output/figures/1_evolucion_casos_muertes.png"
+)
+```
 
 ---
 
-### 🚀 **pipeline.py** - Pipeline ETL Completo
+### 🚀 pipeline.py - Orquestador del Pipeline ETL
 
-**Propósito:** Orquestar todas las etapas del procesamiento en un solo script.
+**¿Qué hace?**
+Ejecuta todas las etapas del pipeline en el orden correcto automáticamente.
 
-**Qué hace:**
-1. ✅ Carga configuración
-2. ✅ Extrae datos del CSV original
-3. ✅ Limpia datos (chunks)
-4. ✅ Aplica transformaciones
-5. ✅ Guarda datos procesados
-6. ✅ Genera agregaciones
-7. ✅ Crea visualizaciones
-
-**Uso básico:**
+**Ejecución:**
 ```bash
 # Ejecutar pipeline completo
 python pipeline.py
@@ -496,41 +439,56 @@ python pipeline.py --input MiArchivo.csv
 python pipeline.py --skip-intermediate
 ```
 
-**Argumentos disponibles:**
-- `--input`: Archivo CSV de entrada (default: `IntegratedData.csv`)
-- `--output`: Directorio de salida (default: `Output/`)
-- `--skip-intermediate`: No guardar archivos intermedios
-- `--show-config`: Mostrar configuración y salir
-- `--visualize`: Generar solo visualizaciones (sin procesar)
-
-**Flujo del pipeline:**
+**Flujo Completo:**
 ```python
-# 1. Extracción
-extractor = DataExtractor(input_file)
+# 1. Configuración
+from Config.Config import *
+setup_directories()
+
+# 2. Extracción
+from Extract.Extract import DataExtractor
+extractor = DataExtractor("IntegratedData.csv")
 df = extractor.extract_full()
 
-# 2. Limpieza
-clean_csv(input_file, cleaned_file)
-df = pd.read_csv(cleaned_file)
+# 3. Limpieza
+from Extract.Clean.Clean import clean_csv
+clean_csv("IntegratedData.csv", "Output/IntegratedData_cleaned.csv")
 
-# 3. Transformación
+# 4. Transformación
+from Transform.Transform import DataTransformer
 transformer = DataTransformer()
+df = pd.read_csv("Output/IntegratedData_cleaned.csv")
 df = transformer.add_temporal_features(df)
 df = transformer.add_moving_average(df, 'daily_cases', window=7)
 df = transformer.calculate_mortality_rate(df)
 
-# 4. Carga
-loader = DataLoader(output_dir)
+# 5. Carga
+from Load.Load import DataLoader
+loader = DataLoader("Output")
 loader.save_csv(df, "IntegratedData_transformed.csv")
 
-# 5. Agregaciones
+# 6. Agregaciones
 nacional = transformer.aggregate_by_date(df)
 estados = transformer.get_top_states(df, n=10)
 condados = transformer.get_top_counties(df, n=10)
+loader.save_csv(nacional, "agregado_nacional.csv")
+loader.save_csv(estados, "top_estados.csv")
+loader.save_csv(condados, "top_condados.csv")
 
-# 6. Visualización
-generar_todas_las_graficas(transformed_file, figures_dir)
+# 7. Visualización
+from Vizualize.plot import generar_todas_las_graficas
+generar_todas_las_graficas(
+    "Output/IntegratedData_transformed.csv",
+    "Output/figures"
+)
 ```
+
+**Argumentos de línea de comandos:**
+- `--input`: Archivo CSV de entrada (default: `IntegratedData.csv`)
+- `--output`: Directorio de salida (default: `Output/`)
+- `--skip-intermediate`: No guardar archivos intermedios
+- `--show-config`: Mostrar configuración y salir
+- `--visualize`: Generar solo visualizaciones
 
 ---
 
@@ -538,54 +496,42 @@ generar_todas_las_graficas(transformed_file, figures_dir)
 
 ```
 WilsonTrabajo1/
-├── 📁 Config/                    # ⚙️ Configuración
+├── Config/
 │   ├── __init__.py
-│   └── Config.py                # Constantes y configuración global
+│   └── Config.py              # ⚙️ Configuración centralizada
 │
-├── 📁 Extract/                   # 📥 Extracción de datos
+├── Extract/
 │   ├── __init__.py
-│   ├── Extract.py               # Clase DataExtractor (7 métodos)
-│   └── 📁 Clean/                # 🧹 Limpieza de datos
+│   ├── Extract.py            # 📥 7 métodos de extracción
+│   └── Clean/
 │       ├── __init__.py
-│       └── Clean.py             # Limpieza por chunks
+│       └── Clean.py          # 🧹 Limpieza por chunks
 │
-├── 📁 Transform/                 # 🔄 Transformación
+├── Transform/
 │   ├── __init__.py
-│   └── Transform.py             # Clase DataTransformer (15+ funciones)
+│   └── Transform.py          # 🔄 15+ transformaciones
 │
-├── 📁 Load/                      # 💾 Persistencia
+├── Load/
 │   ├── __init__.py
-│   └── Load.py                  # Clase DataLoader (4 formatos)
+│   └── Load.py               # 💾 4 formatos + backups
 │
-├── 📁 Vizualize/                 # 📊 Visualización
+├── Vizualize/
 │   ├── __init__.py
-│   └── plot.py                  # 11 funciones de gráficas
+│   └── plot.py               # 📊 11 gráficas profesionales
 │
-├── 📁 Output/                    # 📂 Archivos de salida
-│   ├── __init__.py
+├── Output/
 │   ├── IntegratedData_cleaned.csv
 │   ├── IntegratedData_transformed.csv
 │   ├── agregado_nacional.csv
 │   ├── top_estados.csv
 │   ├── top_condados.csv
-│   └── 📁 figures/              # 11 visualizaciones PNG
-│       ├── 1_evolucion_casos_muertes.png
-│       ├── 2_top_condados_casos.png
-│       ├── 3_casos_vs_muertes.png
-│       ├── 4_movilidad_correlacion.png
-│       ├── 5_comparacion_dias.png
-│       ├── 6_top_estados_casos.png
-│       ├── 7_tasa_mortalidad_estados.png
-│       ├── 8_evolucion_movilidad.png
-│       ├── 9_casos_dia_semana.png
-│       ├── 10_promedio_movil.png
-│       └── 11_mapa_calor_correlacion.png
+│   └── figures/              # 11 visualizaciones PNG
 │
-├── pipeline.py                  # 🚀 Pipeline ETL completo
-├── IntegratedData.csv           # 📊 Dataset original (77MB)
-├── requirements.txt             # 📦 Dependencias Python
-├── README.md                    # 📖 Esta documentación (técnica)
-└── DATASET_INFO.md              # 📊 Información del dataset (no técnica)
+├── pipeline.py               # 🚀 Orquestador principal
+├── IntegratedData.csv        # 📊 Dataset original (77MB)
+├── requirements.txt          # 📦 Dependencias
+├── README.md                 # 📖 Esta documentación (código)
+└── DATASET_INFO.md           # 📊 Info del dataset + gráficas
 ```
 
 ---
@@ -593,30 +539,16 @@ WilsonTrabajo1/
 ## 🛠️ Tecnologías Utilizadas
 
 - **Python 3.x** - Lenguaje de programación
-- **Pandas** - Manipulación de datos (lectura por chunks, limpieza)
-- **NumPy** - Operaciones numéricas
+- **Pandas** - Manipulación de datos y procesamiento por chunks
+- **NumPy** - Operaciones numéricas y álgebra lineal
 - **Matplotlib** - Visualizaciones base
 - **Seaborn** - Gráficas estadísticas avanzadas
-- **Git/GitHub** - Control de versiones
 
 ---
 
-## 📊 Estado Actual del Proyecto
+## 🚦 Guía para Desarrolladores
 
-- ✅ **Configuración:** Módulo completo con todas las constantes
-- ✅ **Extracción:** 7 métodos diferentes de lectura
-- ✅ **Limpieza:** Procesamiento por chunks implementado
-- ✅ **Transformación:** 15+ funciones de análisis
-- ✅ **Carga:** Soporte para 4 formatos
-- ✅ **Visualización:** 11 gráficas profesionales
-- ✅ **Pipeline:** Script integrador funcional
-- ✅ **Documentación:** README técnico completo
-
----
-
-## 🚦 Cómo Empezar a Desarrollar
-
-### 1. Clonar y configurar entorno
+### 1. Clonar y configurar
 
 ```bash
 git clone https://github.com/kenmaroyert1/WilsonTrabajo1.git
@@ -629,12 +561,7 @@ pip install -r requirements.txt
 ```python
 from Config.Config import *
 
-# Ver rutas configuradas
 print(f"Root: {PROJECT_ROOT}")
-print(f"Data: {DATA_DIR}")
-print(f"Output: {OUTPUT_DIR}")
-
-# Ver parámetros
 print(f"Chunk size: {CHUNK_SIZE}")
 ```
 
@@ -644,23 +571,15 @@ print(f"Chunk size: {CHUNK_SIZE}")
 # Extracción
 from Extract.Extract import DataExtractor
 extractor = DataExtractor("IntegratedData.csv")
-df_sample = extractor.extract_sample(frac=0.01)  # 1% de datos
-
-# Limpieza
-from Extract.Clean.Clean import clean_csv
-clean_csv("test_input.csv", "test_output.csv")
+df_sample = extractor.extract_sample(frac=0.01)
 
 # Transformación
 from Transform.Transform import DataTransformer
 transformer = DataTransformer()
 df = transformer.add_moving_average(df, 'cases', window=7)
-
-# Visualización
-from Vizualize.plot import crear_serie_temporal_casos
-crear_serie_temporal_casos("Output/IntegratedData_transformed.csv")
 ```
 
-### 4. Ejecutar pipeline completo
+### 4. Ejecutar pipeline
 
 ```bash
 python pipeline.py
@@ -668,81 +587,57 @@ python pipeline.py
 
 ### 5. Verificar resultados
 
-- Revisar `Output/IntegratedData_cleaned.csv`
-- Revisar `Output/IntegratedData_transformed.csv`
-- Ver gráficas en `Output/figures/`
+- `Output/IntegratedData_cleaned.csv` - Datos limpios
+- `Output/IntegratedData_transformed.csv` - Datos transformados
+- `Output/figures/` - 11 gráficas PNG
 
 ---
 
 ## 🧪 Testing y Debugging
 
-### Probar con datos pequeños
+### Probar con muestra pequeña
 
 ```python
-# Usar muestra del 10%
+# Usar solo 1% de datos
 extractor = DataExtractor("IntegratedData.csv")
-df_test = extractor.extract_sample(frac=0.1)
+df_test = extractor.extract_sample(frac=0.01)
 df_test.to_csv("test_sample.csv", index=False)
 
 # Ejecutar pipeline con muestra
 python pipeline.py --input test_sample.csv
 ```
 
-### Verificar chunks
+### Verificar procesamiento por chunks
 
 ```python
-from Extract.Extract import DataExtractor
-
 extractor = DataExtractor("IntegratedData.csv")
 for i, chunk in enumerate(extractor.extract_chunks(chunk_size=10000)):
-    print(f"Chunk {i}: {len(chunk)} filas, {chunk.memory_usage().sum() / 1024**2:.2f} MB")
-    if i >= 5:  # Solo primeros 5 chunks
+    print(f"Chunk {i}: {len(chunk)} filas")
+    if i >= 5:
         break
 ```
 
 ### Validar transformaciones
 
 ```python
-from Transform.Transform import DataTransformer
-import pandas as pd
-
-df = pd.read_csv("Output/IntegratedData_cleaned.csv", nrows=1000)
 transformer = DataTransformer()
+df = pd.read_csv("Output/IntegratedData_cleaned.csv", nrows=1000)
 
-# Antes
-print("Antes:", df.columns.tolist())
-print("Shape:", df.shape)
-
-# Transformar
+print("Antes:", df.shape)
 df = transformer.add_temporal_features(df)
-
-# Después
-print("Después:", df.columns.tolist())
-print("Shape:", df.shape)
+print("Después:", df.shape)
+print("Nuevas columnas:", df.columns.tolist())
 ```
 
 ---
 
 ## 📖 Documentación Relacionada
 
-- **[DATASET_INFO.md](DATASET_INFO.md)** - Información completa sobre el dataset, visualizaciones, casos de uso e interpretación de gráficas
-
----
-
-## 👥 Contribuciones
-
-Este es un proyecto académico. Para consultas o sugerencias, contactar al equipo de desarrollo.
-
----
-
-## 📝 Licencia
-
-Proyecto académico - Universidad
+- 📊 **[DATASET_INFO.md](DATASET_INFO.md)** - Para qué sirve el dataset, visualizaciones con explicaciones, casos de uso reales
 
 ---
 
 ## 📞 Contacto
 
 - **Repositorio:** https://github.com/kenmaroyert1/WilsonTrabajo1
-- **Autor:** Wilson
-- **Curso:** Análisis de Datos / Ciencia de Datos
+- **Proyecto académico** - Universidad
