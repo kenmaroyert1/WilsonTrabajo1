@@ -506,24 +506,41 @@ Después de procesar y visualizar este dataset, podemos concluir:
 - **NumPy:** Operaciones numéricas y álgebra lineal
 - **Git/GitHub:** Control de versiones y colaboración
 
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto y Explicación de Archivos .py
 
 ```
 WilsonTrabajo1/
-├── Config/                   # Configuraciones del proyecto
-├── Extract/
-│   ├── Extract.py           # Módulo de extracción (placeholder)
-│   └── Clean/
-│       └── Clean.py         # Limpieza de datos por chunks
-├── Transform/
-│   └── Transform.py         # Transformaciones (placeholder)
-├── Load/
-│   └── Load.py              # Carga de datos (placeholder)
-├── Vizualize/
-│   └── plot.py              # Generación de 11 gráficas profesionales
-├── Output/
-│   ├── IntegratedData_cleaned.csv  # Dataset limpio (77MB)
-│   └── figures/             # 11 visualizaciones PNG
+├── 📁 Config/                    # ⚙️ Módulo de configuración
+│   ├── __init__.py              # Hace que Config sea un paquete Python
+│   └── Config.py                # ⚙️ CONFIGURACIÓN CENTRALIZADA
+│
+├── 📁 Extract/                   # 📥 Módulo de extracción de datos
+│   ├── __init__.py              # Hace que Extract sea un paquete Python
+│   ├── Extract.py               # 📥 EXTRACCIÓN DE DATOS
+│   └── 📁 Clean/                # 🧹 Submódulo de limpieza
+│       ├── __init__.py          # Hace que Clean sea un paquete Python
+│       └── Clean.py             # 🧹 LIMPIEZA DE DATOS
+│
+├── 📁 Transform/                 # 🔄 Módulo de transformación
+│   ├── __init__.py              # Hace que Transform sea un paquete Python
+│   └── Transform.py             # 🔄 TRANSFORMACIÓN Y ANÁLISIS
+│
+├── 📁 Load/                      # 💾 Módulo de carga/guardado
+│   ├── __init__.py              # Hace que Load sea un paquete Python
+│   └── Load.py                  # 💾 PERSISTENCIA DE DATOS
+│
+├── 📁 Vizualize/                 # 📊 Módulo de visualización
+│   ├── __init__.py              # Hace que Vizualize sea un paquete Python
+│   └── plot.py                  # 📊 GENERACIÓN DE GRÁFICAS
+│
+├── 📁 Output/                    # 📂 Archivos de salida
+│   ├── __init__.py              # Hace que Output sea un paquete Python
+│   ├── IntegratedData_cleaned.csv      # Dataset limpio (77MB)
+│   ├── IntegratedData_transformed.csv  # Dataset transformado (generado por pipeline)
+│   ├── agregado_nacional.csv           # Agregaciones nacionales
+│   ├── top_estados.csv                 # Top 10 estados
+│   ├── top_condados.csv                # Top 10 condados
+│   └── 📁 figures/              # 11 visualizaciones PNG
 │       ├── 1_evolucion_casos_muertes.png
 │       ├── 2_top_condados_casos.png
 │       ├── 3_casos_vs_muertes.png
@@ -535,12 +552,664 @@ WilsonTrabajo1/
 │       ├── 9_casos_dia_semana.png
 │       ├── 10_promedio_movil.png
 │       └── 11_mapa_calor_correlacion.png
-├── IntegratedData.csv       # Dataset original (77MB)
-├── requirements.txt         # Dependencias Python
-└── README.md               # Esta documentación
+│
+├── pipeline.py                  # 🚀 PIPELINE ETL COMPLETO
+├── IntegratedData.csv           # Dataset original (77MB)
+├── requirements.txt             # Dependencias Python
+└── README.md                    # Esta documentación
 
 Total: ~155MB de datos + 11 visualizaciones profesionales
 ```
+
+### 📝 ¿Para Qué Sirve Cada Archivo .py?
+
+#### ⚙️ **Config/Config.py** - Configuración Centralizada del Proyecto
+**Propósito:** Almacena TODAS las configuraciones en un solo lugar para evitar "números mágicos" y facilitar mantenimiento.
+
+**Qué contiene:**
+- 📁 **Rutas de directorios:** Define dónde están los datos, salidas y figuras
+  ```python
+  PROJECT_ROOT = Path(__file__).parent.parent  # Raíz del proyecto
+  DATA_DIR = PROJECT_ROOT                      # Donde están los CSV originales
+  OUTPUT_DIR = PROJECT_ROOT / "Output"         # Donde se guardan resultados
+  FIGURES_DIR = OUTPUT_DIR / "figures"         # Donde se guardan gráficas
+  ```
+
+- ⚙️ **Parámetros de procesamiento:**
+  ```python
+  CHUNK_SIZE = 100_000              # Cuántas filas procesar a la vez (memoria eficiente)
+  MOVING_AVERAGE_WINDOW = 7         # Ventana para promedios móviles
+  TOP_N_COUNTIES = 10               # Cuántos condados mostrar en rankings
+  TOP_N_STATES = 10                 # Cuántos estados mostrar en rankings
+  ```
+
+- 📊 **Configuración de visualización:**
+  ```python
+  FIGURE_SIZE_DEFAULT = (12, 6)     # Tamaño por defecto de gráficas
+  DPI = 100                         # Resolución de imágenes
+  COLOR_PALETTE = 'Set2'            # Paleta de colores Seaborn
+  ```
+
+- 📋 **Definición de columnas esperadas:**
+  ```python
+  EXPECTED_COLUMNS = ['date', 'county', 'state', 'fips', 'cases', 'deaths', ...]
+  MOBILITY_COLUMNS = ['retail_recreation', 'grocery_pharmacy', 'parks', ...]
+  NUMERIC_COLUMNS = ['cases', 'deaths', 'daily_cases', 'daily_deaths']
+  DATE_COLUMNS = ['date']
+  ```
+
+- 🛠️ **Funciones de utilidad:**
+  - `ensure_directories()`: Crea los directorios necesarios si no existen
+  - `get_config_summary()`: Muestra un resumen de toda la configuración
+
+**Cuándo usarlo:**
+- Al inicio de cualquier script para importar configuraciones
+- Si necesitas cambiar rutas, tamaños de figura, o parámetros globales
+- Para mantener consistencia en todo el proyecto
+
+**Ejemplo de uso:**
+```python
+from Config.Config import OUTPUT_DIR, CHUNK_SIZE, ensure_directories
+
+ensure_directories()  # Crear directorios si no existen
+print(f"Procesando con chunks de {CHUNK_SIZE:,} filas")
+```
+
+---
+
+#### 📥 **Extract/Extract.py** - Extracción de Datos desde CSV
+**Propósito:** Proporciona múltiples estrategias para leer el dataset según necesidades (memoria, velocidad, filtros).
+
+**Qué contiene:**
+Clase `DataExtractor` con 7 métodos diferentes de extracción:
+
+1. **`extract_full()`** - Carga completa en memoria
+   - Usa cuando: Tienes suficiente RAM (8GB+) y necesitas todos los datos a la vez
+   - Retorna: DataFrame completo de pandas
+
+2. **`extract_chunks(chunk_size)`** - Iterador por chunks
+   - Usa cuando: Archivo muy grande (>1GB) y no cabe en memoria
+   - Retorna: Generador que produce chunks de datos
+   - Ejemplo: Procesar 100,000 filas a la vez
+
+3. **`extract_columns(columns)`** - Solo columnas específicas
+   - Usa cuando: Solo necesitas algunas columnas (ahorra memoria)
+   - Retorna: DataFrame con columnas seleccionadas
+
+4. **`extract_sample(frac=0.1)`** - Muestreo aleatorio
+   - Usa cuando: Quieres hacer pruebas rápidas con 10% de datos
+   - Retorna: DataFrame con muestra aleatoria
+
+5. **`extract_by_state(states)`** - Filtrar por estados
+   - Usa cuando: Solo necesitas datos de ciertos estados (ej: California, Texas)
+   - Retorna: DataFrame filtrado
+
+6. **`extract_date_range(start, end)`** - Filtrar por fechas
+   - Usa cuando: Solo necesitas un período específico (ej: marzo-abril 2021)
+   - Retorna: DataFrame con fechas en el rango
+
+7. **`get_info()`** - Información del archivo SIN cargarlo
+   - Usa cuando: Quieres saber tamaño, columnas, etc. sin usar memoria
+   - Retorna: Diccionario con metadatos
+
+**Cuándo usarlo:**
+- Al inicio del pipeline para cargar datos originales
+- Cuando necesites leer solo parte de los datos
+- Para análisis exploratorios rápidos con muestras
+
+**Ejemplo de uso:**
+```python
+from Extract.Extract import DataExtractor
+
+# Crear extractor
+extractor = DataExtractor("IntegratedData.csv")
+
+# Opción 1: Cargar todo (si tienes RAM)
+df_completo = extractor.extract_full()
+
+# Opción 2: Procesar por chunks (archivos grandes)
+for chunk in extractor.extract_chunks(chunk_size=50000):
+    procesar(chunk)  # Procesa cada chunk
+
+# Opción 3: Solo datos de California
+df_california = extractor.extract_by_state(['California'])
+
+# Opción 4: Solo columnas de casos y muertes
+df_mini = extractor.extract_columns(['date', 'cases', 'deaths'])
+```
+
+---
+
+#### 🧹 **Extract/Clean/Clean.py** - Limpieza de Datos
+**Propósito:** Limpiar y normalizar datos crudos para análisis (manejo de chunks para archivos grandes).
+
+**Qué hace:**
+1. **Normalización de nombres de columnas:**
+   - Convierte a minúsculas: `Cases` → `cases`
+   - Remueve espacios: `Daily Cases` → `daily_cases`
+
+2. **Limpieza de valores:**
+   - Strings: Quita espacios al inicio/final
+   - Valores vacíos: Convierte `""` → `NaN`
+   - Fechas: Parsea automáticamente columnas `date`
+
+3. **Eliminación de duplicados:**
+   - Identifica filas duplicadas
+   - Las elimina manteniendo la primera ocurrencia
+   - Usa streaming para archivos grandes (no carga todo en memoria)
+
+4. **Eliminación de filas vacías:**
+   - Detecta filas donde TODAS las columnas son NaN
+   - Las elimina para reducir tamaño del archivo
+
+**Procesamiento por chunks:**
+- Lee el archivo en bloques de 100,000 filas
+- Procesa cada bloque independientemente
+- Guarda resultados de manera incremental
+- **Ventaja:** Puede procesar archivos de 10GB+ con solo 2GB de RAM
+
+**Cuándo usarlo:**
+- Inmediatamente después de recibir datos crudos
+- Antes de cualquier análisis o visualización
+- Si el archivo tiene problemas de formato
+
+**Ejemplo de uso:**
+```python
+from Extract.Clean.Clean import clean_csv
+
+# Limpiar archivo (procesamiento automático por chunks)
+clean_csv(
+    input_csv="IntegratedData.csv",
+    output_csv="Output/IntegratedData_cleaned.csv"
+)
+
+# Resultado: Archivo limpio guardado en Output/
+```
+
+**Funciones principales:**
+- `normalize_column_name(col)`: Normaliza nombre de columna
+- `clean_chunk(chunk)`: Limpia un chunk de datos
+- `clean_csv(input, output)`: Función principal que orquesta todo
+
+---
+
+#### 🔄 **Transform/Transform.py** - Transformación y Análisis de Datos
+**Propósito:** Calcular métricas derivadas, agregaciones y análisis avanzados sobre datos limpios.
+
+**Qué contiene:**
+Clase `DataTransformer` con 15+ funciones de transformación:
+
+**1. Métricas Derivadas:**
+- `calculate_moving_average(column, window=7)`: Promedio móvil (suaviza series temporales)
+- `calculate_growth_rate(column)`: Tasa de crecimiento porcentual diaria
+- `calculate_mortality_rate()`: Muertes / Casos * 100
+
+**2. Agregaciones:**
+- `aggregate_by_date()`: Suma nacional diaria
+- `aggregate_by_state()`: Totales por estado
+- `aggregate_by_county()`: Totales por condado
+
+**3. Rankings:**
+- `get_top_counties(metric, n=10)`: Top N condados por métrica
+- `get_top_states(metric, n=10)`: Top N estados por métrica
+
+**4. Análisis Estadístico:**
+- `calculate_correlation_matrix(columns)`: Matriz de correlación
+- `get_summary_statistics()`: Estadísticas descriptivas (media, mediana, std, etc.)
+
+**5. Feature Engineering:**
+- `add_time_features()`: Agrega año, mes, semana, día, trimestre desde fecha
+- `normalize_column(column, method)`: MinMax o Z-score normalización
+- `filter_outliers(column, method)`: Detecta y remueve outliers
+
+**Cuándo usarlo:**
+- Después de limpiar datos y antes de visualizar
+- Para calcular métricas que no están en los datos originales
+- Para análisis exploratorio y generación de insights
+
+**Ejemplo de uso:**
+```python
+from Transform.Transform import DataTransformer
+import pandas as pd
+
+# Cargar datos limpios
+df = pd.read_csv("Output/IntegratedData_cleaned.csv")
+
+# Crear transformador
+transformer = DataTransformer(df)
+
+# Calcular promedio móvil de 7 días para casos
+df_transformed = transformer.calculate_moving_average('daily_cases', window=7)
+
+# Calcular tasa de mortalidad
+df_transformed = transformer.calculate_mortality_rate()
+
+# Obtener top 10 estados con más casos
+top_states = transformer.get_top_states('cases', n=10)
+
+# Agregar características temporales (año, mes, semana, etc.)
+df_transformed = transformer.add_time_features()
+
+# Calcular matriz de correlación
+corr_matrix = transformer.calculate_correlation_matrix()
+```
+
+---
+
+#### 💾 **Load/Load.py** - Persistencia y Carga de Datos
+**Propósito:** Guardar y cargar datos procesados en múltiples formatos (CSV, Excel, JSON, Parquet).
+
+**Qué contiene:**
+Clase `DataLoader` con funciones de guardado/carga:
+
+**Formatos soportados:**
+1. **CSV** - `save_to_csv()` / `load_from_csv()`
+   - Formato universal, compatible con todo
+   - Opción chunked para archivos grandes
+
+2. **Excel** - `save_to_excel()` / `load_from_excel()`
+   - Para reportes y análisis en Excel/Sheets
+   - Soporta múltiples hojas
+
+3. **JSON** - `save_to_json()` / `load_from_json()`
+   - Para APIs y aplicaciones web
+   - Soporta JSON Lines (streaming)
+
+4. **Parquet** - `save_to_parquet()` / `load_from_parquet()`
+   - Formato columnar comprimido
+   - Más rápido y 70% más pequeño que CSV
+
+**Funciones adicionales:**
+- `create_backup(filename)`: Crea copia de seguridad con timestamp
+- `save_metadata(filename, metadata)`: Guarda metadatos en JSON
+- `load_metadata(filename)`: Carga metadatos
+- `list_files(extension)`: Lista archivos en Output/
+- `get_file_info(filename)`: Información de archivo (tamaño, fecha, etc.)
+
+**Cuándo usarlo:**
+- Al final del pipeline para guardar resultados
+- Para crear backups antes de modificaciones
+- Para exportar datos a diferentes herramientas
+
+**Ejemplo de uso:**
+```python
+from Load.Load import DataLoader
+import pandas as pd
+
+# Crear loader
+loader = DataLoader(output_dir="Output")
+
+# Guardar DataFrame en CSV
+df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+loader.save_to_csv(df, "resultados.csv")
+
+# Guardar en Excel
+loader.save_to_excel(df, "resultados.xlsx", sheet_name="Datos")
+
+# Guardar en Parquet (comprimido)
+loader.save_to_parquet(df, "resultados.parquet", compression='snappy')
+
+# Crear backup
+loader.create_backup("IntegratedData_cleaned.csv")
+
+# Guardar metadatos
+metadata = {
+    'descripcion': 'Datos procesados',
+    'filas': len(df),
+    'columnas': list(df.columns)
+}
+loader.save_metadata("resultados.csv", metadata)
+
+# Cargar datos
+df_cargado = loader.load_from_csv("resultados.csv")
+
+# Listar todos los CSV en Output/
+archivos = loader.list_files(extension='.csv')
+print(f"Encontrados {len(archivos)} archivos CSV")
+```
+
+---
+
+#### 📊 **Vizualize/plot.py** - Generación de Visualizaciones
+**Propósito:** Crear 11 gráficas profesionales en español que explican la pandemia desde múltiples ángulos.
+
+**Qué contiene:**
+11 funciones especializadas de visualización:
+
+1. **`plot_1_temporal_nacional()`** - Evolución temporal de casos y muertes
+   - Gráfica de líneas con doble eje Y
+   - Muestra tendencias nacionales día a día
+
+2. **`plot_2_top_condados()`** - Top 10 condados con más casos
+   - Gráfica de barras horizontales
+   - Identifica hotspots locales
+
+3. **`plot_3_casos_vs_muertes()`** - Relación casos vs muertes
+   - Scatter plot con regresión
+   - Muestra tasa de letalidad
+
+4. **`plot_4_movilidad_correlacion()`** - Impacto de movilidad en casos
+   - Gráfica de barras de correlaciones
+   - Identifica qué actividades aumentan contagios
+
+5. **`plot_5_comparacion_dias()`** - Días laborales vs fines de semana
+   - Gráfica de barras comparativa
+   - Muestra sesgos de reporte
+
+6. **`plot_6_top_estados_casos()`** - Top 10 estados más afectados
+   - Gráfica de barras horizontales
+   - Comparación a nivel estatal
+
+7. **`plot_7_tasa_mortalidad_estados()`** - Tasa de mortalidad por estado
+   - Gráfica de barras con gradiente de color
+   - Identifica estados con mayor severidad
+
+8. **`plot_8_evolucion_movilidad()`** - Evolución de movilidad en el tiempo
+   - Gráfica de líneas múltiples
+   - Muestra cambios de comportamiento
+
+9. **`plot_9_casos_dia_semana()`** - Distribución por día de la semana
+   - Gráfica de barras por día
+   - Identifica patrones semanales
+
+10. **`plot_10_promedio_movil()`** - Promedio móvil de casos (7 días)
+    - Gráfica con datos crudos + suavizados
+    - Facilita ver tendencias reales
+
+11. **`plot_11_mapa_calor_correlacion()`** - Mapa de calor de correlaciones
+    - Heatmap con todas las variables
+    - Identifica relaciones entre variables
+
+**Características comunes:**
+- Todas en español (títulos, etiquetas, leyendas)
+- Estilo profesional consistente
+- Alta resolución (DPI 100)
+- Colores accesibles (colorblind-friendly)
+- Guardado automático en PNG
+
+**Cuándo usarlo:**
+- Al final del pipeline para crear reportes visuales
+- Para presentaciones y reportes
+- Para exploración de datos
+
+**Ejemplo de uso:**
+```python
+from Vizualize.plot import (
+    plot_1_temporal_nacional,
+    plot_11_mapa_calor_correlacion,
+    generate_all_plots
+)
+import pandas as pd
+
+# Cargar datos
+df = pd.read_csv("Output/IntegratedData_cleaned.csv")
+
+# Generar una gráfica específica
+plot_1_temporal_nacional(df, outdir="Output/figures")
+
+# O generar todas las 11 gráficas de una vez
+generate_all_plots(df, outdir="Output/figures")
+
+# Las gráficas se guardan automáticamente en Output/figures/
+```
+
+---
+
+#### 🚀 **pipeline.py** - Pipeline ETL Completo Integrador
+**Propósito:** Orquesta TODO el flujo de trabajo de principio a fin (Extract → Clean → Transform → Load → Visualize).
+
+**Qué hace:**
+Clase `COVIDPipeline` que ejecuta 5 pasos secuenciales:
+
+**PASO 1: Extracción** (`step1_extract`)
+- Lee el archivo CSV original
+- Valida que existe
+- Puede usar diferentes métodos (full, chunks, sample)
+
+**PASO 2: Limpieza** (`step2_clean`)
+- Ejecuta `clean_csv()` con procesamiento por chunks
+- Normaliza columnas
+- Elimina duplicados y valores vacíos
+- Guarda: `IntegratedData_cleaned.csv`
+
+**PASO 3: Transformación** (`step3_transform`)
+- Calcula promedios móviles (7 días)
+- Calcula tasa de mortalidad
+- Calcula tasa de crecimiento
+- Agrega características temporales (año, mes, semana, etc.)
+- Retorna: DataFrame con métricas derivadas
+
+**PASO 4: Carga** (`step4_load`)
+- Guarda datos transformados en CSV
+- Crea archivo de metadatos JSON
+- Crea backup del archivo limpio
+- Guarda: `IntegratedData_transformed.csv` + metadatos
+
+**PASO 5: Análisis y Agregaciones** (`step5_analyze`)
+- Agrega datos a nivel nacional
+- Identifica top 10 estados
+- Identifica top 10 condados
+- Calcula estadísticas descriptivas
+- Calcula matriz de correlación
+- Guarda: `agregado_nacional.csv`, `top_estados.csv`, `top_condados.csv`
+
+**Cuándo usarlo:**
+- Para ejecutar el análisis completo de principio a fin
+- En producción o automatización
+- Para procesar nuevos datasets con la misma estructura
+
+**Ejemplo de uso:**
+```bash
+# Ejecutar pipeline completo con configuración por defecto
+python pipeline.py
+
+# Ver configuración antes de ejecutar
+python pipeline.py --show-config
+
+# Usar un archivo de entrada diferente
+python pipeline.py --input OtroDatos.csv
+
+# No guardar archivos intermedios (solo resultado final)
+python pipeline.py --skip-intermediate
+```
+
+**Desde Python:**
+```python
+from pipeline import COVIDPipeline
+
+# Crear pipeline
+pipeline = COVIDPipeline(input_file="IntegratedData.csv")
+
+# Ejecutar pipeline completo
+df_final = pipeline.run_full_pipeline(save_intermediate=True)
+
+# O ejecutar pasos individuales
+df_clean = pipeline.step2_clean()
+df_transformed = pipeline.step3_transform(df_clean)
+pipeline.step4_load(df_transformed)
+results = pipeline.step5_analyze(df_transformed)
+
+print(f"✅ Pipeline completado: {len(df_final):,} filas procesadas")
+```
+
+**Salida del pipeline:**
+- `IntegratedData_cleaned.csv` - Datos limpios
+- `IntegratedData_transformed.csv` - Datos con métricas derivadas
+- `agregado_nacional.csv` - Suma nacional diaria
+- `top_estados.csv` - Top 10 estados
+- `top_condados.csv` - Top 10 condados
+- Archivo de metadatos JSON
+- Backup con timestamp
+
+---
+
+### 🔄 Flujo de Trabajo Completo
+
+```
+1. IntegratedData.csv (77MB)
+         ↓
+2. Config.py (carga configuraciones)
+         ↓
+3. Extract.py (lee datos)
+         ↓
+4. Clean.py (limpia datos)
+         ↓
+5. Transform.py (calcula métricas)
+         ↓
+6. Load.py (guarda resultados)
+         ↓
+7. plot.py (genera gráficas)
+         ↓
+8. Output/ (11 PNG + CSVs procesados)
+```
+
+**Todo esto es orquestado por `pipeline.py`** para ejecutar de forma automática.
+
+---
+
+### 💡 Consejos de Uso
+
+**Para análisis exploratorio rápido:**
+```python
+# Usar Extract.py con muestreo
+from Extract.Extract import DataExtractor
+extractor = DataExtractor("IntegratedData.csv")
+df_sample = extractor.extract_sample(frac=0.1)  # Solo 10% de datos
+```
+
+**Para procesar archivos gigantes (>5GB):**
+```python
+# Usar procesamiento por chunks
+from Extract.Extract import DataExtractor
+for chunk in DataExtractor("BigFile.csv").extract_chunks(50000):
+    process(chunk)  # Procesa de a poco
+```
+
+**Para crear reportes automatizados:**
+```bash
+# Ejecutar pipeline completo desde terminal
+python pipeline.py --input NuevosDatos.csv
+```
+
+**Para análisis específico de un estado:**
+```python
+from Extract.Extract import DataExtractor
+df_california = DataExtractor("IntegratedData.csv").extract_by_state(['California'])
+```
+
+Total: ~155MB de datos + 11 visualizaciones profesionales + Pipeline ETL completo
+
+---
+
+## 📊 Resumen Visual: Arquitectura del Proyecto
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PROYECTO WILSONTRABAJO1                      │
+│          Análisis de COVID-19 y Movilidad en EE.UU.            │
+└─────────────────────────────────────────────────────────────────┘
+
+                         📥 ENTRADA
+                             │
+                   IntegratedData.csv
+                    (77MB, 935k filas)
+                             │
+         ┌───────────────────┴───────────────────┐
+         │                                       │
+         ▼                                       ▼
+    ⚙️ Config.py                          📥 Extract.py
+    • Rutas                                • 7 métodos de
+    • Parámetros                            extracción
+    • Constantes                           • Filtros por estado
+    │                                      • Muestreo aleatorio
+    │                                           │
+    │                                           ▼
+    │                                    🧹 Clean.py
+    │                                    • Procesamiento chunks
+    │                                    • Normalización
+    │                                    • Deduplicación
+    │                                           │
+    └────────────┬──────────────────────────────┘
+                 │
+                 ▼
+          🔄 Transform.py
+          • Promedios móviles
+          • Tasas derivadas
+          • Agregaciones
+          • Correlaciones
+          • 15+ funciones
+                 │
+                 ▼
+          💾 Load.py
+          • Guardar CSV/Excel
+          • Guardar JSON/Parquet
+          • Metadatos
+          • Backups
+                 │
+         ┌───────┴───────┐
+         │               │
+         ▼               ▼
+  📊 Vizualize.py   📂 Output/
+  • 11 gráficas     • IntegratedData_cleaned.csv (77MB)
+    en español      • IntegratedData_transformed.csv
+  • Profesionales   • agregado_nacional.csv
+  • PNG alta res    • top_estados.csv
+         │          • top_condados.csv
+         │          • metadatos.json
+         └───────┬──┘
+                 │
+                 ▼
+          📁 Output/figures/
+          ┌──────────────────────────────────────┐
+          │ ✅ 1_evolucion_casos_muertes.png    │
+          │ ✅ 2_top_condados_casos.png         │
+          │ ✅ 3_casos_vs_muertes.png           │
+          │ ✅ 4_movilidad_correlacion.png      │
+          │ ✅ 5_comparacion_dias.png           │
+          │ ✅ 6_top_estados_casos.png          │
+          │ ✅ 7_tasa_mortalidad_estados.png    │
+          │ ✅ 8_evolucion_movilidad.png        │
+          │ ✅ 9_casos_dia_semana.png           │
+          │ ✅ 10_promedio_movil.png            │
+          │ ✅ 11_mapa_calor_correlacion.png    │
+          └──────────────────────────────────────┘
+
+         TODO ORQUESTADO POR: 🚀 pipeline.py
+         Ejecutar: python pipeline.py
+```
+
+### 🎯 Flujo de Datos Simplificado
+
+```
+CSV Crudo → Extract → Clean → Transform → Load → Visualize → Resultados
+  (77MB)      (lee)   (limpia)  (calcula)  (guarda)  (grafica)   (11 PNG)
+```
+
+### 📈 Métricas del Proyecto
+
+| Componente | Líneas de Código | Funciones | Descripción |
+|------------|------------------|-----------|-------------|
+| **Config.py** | 290 | 2 | Configuración centralizada |
+| **Extract.py** | 250 | 8 | Extracción de datos |
+| **Clean.py** | 130 | 3 | Limpieza de datos |
+| **Transform.py** | 450 | 16 | Transformaciones y análisis |
+| **Load.py** | 450 | 13 | Persistencia de datos |
+| **plot.py** | 620 | 12 | Visualizaciones profesionales |
+| **pipeline.py** | 280 | 6 | Orquestador ETL completo |
+| **TOTAL** | **2,470** | **60** | **Pipeline ETL completo funcional** |
+
+### 📦 Archivos Generados por el Pipeline
+
+| Archivo | Tamaño | Filas | Columnas | Descripción |
+|---------|--------|-------|----------|-------------|
+| IntegratedData_cleaned.csv | 77MB | 935,444 | 17 | Datos limpios |
+| IntegratedData_transformed.csv | 85MB | 935,444 | 25+ | + métricas derivadas |
+| agregado_nacional.csv | 50KB | 365 | 4 | Suma nacional diaria |
+| top_estados.csv | 2KB | 10 | 5 | Top 10 estados |
+| top_condados.csv | 3KB | 10 | 6 | Top 10 condados |
+| 11 gráficas PNG | 5MB | - | - | Visualizaciones profesionales |
+
+---
 
 ## 🚀 Próximas Mejoras Posibles
 
