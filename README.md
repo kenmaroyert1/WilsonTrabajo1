@@ -1,6 +1,48 @@
 # WilsonTrabajo1 - Análisis de COVID-19 y Movilidad en EE.UU.
 
-## 📊 Descripción del Proyecto
+## � Inicio Rápido (Quick Start)
+
+### Requisitos Previos
+- Python 3.7 o superior
+- Dataset: `IntegratedData.csv` (colocar en la raíz del proyecto)
+
+### Instalación en 3 Pasos
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/kenmaroyert1/WilsonTrabajo1.git
+cd WilsonTrabajo1
+
+# 2. Instalar dependencias
+pip install -r requirements.txt
+
+# 3. Ejecutar el pipeline completo
+python pipeline.py
+```
+
+### ✅ Resultado
+Después de ejecutar `pipeline.py`, obtendrás:
+- ✔️ Datos limpios: `Output/IntegratedData_cleaned.csv`
+- ✔️ Datos transformados: `Output/IntegratedData_transformed.csv`
+- ✔️ 11 gráficas profesionales en: `Output/figures/`
+- ✔️ Agregaciones: `Output/agregado_nacional.csv`, `top_estados.csv`, `top_condados.csv`
+
+### 📊 Ejecutar Solo Visualizaciones
+
+Si ya tienes los datos procesados:
+```python
+from Vizualize.plot import *
+from Config.Config import OUTPUT_DIR, FIGURES_DIR
+
+# Generar todas las gráficas
+crear_serie_temporal_casos(OUTPUT_DIR / "IntegratedData_transformed.csv")
+crear_mapa_calor_movilidad(OUTPUT_DIR / "IntegratedData_transformed.csv")
+# ... más funciones disponibles
+```
+
+---
+
+## �📊 Descripción del Proyecto
 
 Este proyecto realiza un análisis exhaustivo de datos de COVID-19 en Estados Unidos, combinando información epidemiológica (casos y muertes) con datos de movilidad poblacional. El objetivo es entender cómo los cambios en los patrones de movilidad afectaron la propagación del virus durante la pandemia.
 
