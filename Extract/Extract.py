@@ -237,10 +237,6 @@ class DataExtractor:
             Procesando 50,000 filas...
             ...
         """
-        
-        Yields:
-            DataFrames en chunks del tamaño especificado
-        """
         self.validate_file()
         
         print(f"🔄 Extrayendo datos por chunks (tamaño: {self.chunk_size:,} filas)...")
