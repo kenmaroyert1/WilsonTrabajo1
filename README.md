@@ -1,5 +1,10 @@
 # WilsonTrabajo1 - Pipeline ETL para Análisis de COVID-19
 
+> 📊 **¿Buscas información sobre el dataset y las visualizaciones?**  
+> → Ver **[DATASET_INFO.md](DATASET_INFO.md)** - Información del dataset, 6 casos de uso y 11 visualizaciones explicadas detalladamente
+
+---
+
 ## 🚀 Inicio Rápido
 
 ### Requisitos Previos

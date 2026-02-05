@@ -1,5 +1,10 @@
 # Análisis de COVID-19 y Movilidad en EE.UU. - Información del Dataset
 
+> 💻 **¿Eres desarrollador y buscas documentación técnica del código?**  
+> → Ver **[README.md](README.md)** - Documentación técnica completa, arquitectura ETL y guía para desarrolladores
+
+---
+
 ## 📊 Sobre el Dataset
 
 ### Fuente de Datos
