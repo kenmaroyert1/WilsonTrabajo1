@@ -1,14 +1,31 @@
-"""Herramientas de limpieza para el dataset integrado.
+"""🧹 MÓDULO DE LIMPIEZA DE DATOS
 
-Este módulo procesa CSVs en chunks para manejar archivos grandes, normaliza
-los nombres de columnas, recorta espacios en strings, elimina duplicados y
-filas completamente vacías, e intenta parsear columnas de fecha si su nombre
-contiene 'date'.
+Este módulo es el SEGUNDO PASO del pipeline ETL. Se encarga de LIMPIAR
+los datos crudos para que estén listos para análisis.
 
-Uso:
-	python -m Extract.Clean.Clean --input <ruta_csv> --output <ruta_salida>
+🎯 PROPÓSITO:
+   Convertir datos "sucios" (con errores, duplicados, formatos inconsistentes)
+   en datos "limpios" y listos para usar.
 
-La salida será un CSV escrito por chunks en `output`.
+🔧 QUÉ HACE:
+   1. Normaliza nombres de columnas (minúsculas, sin espacios)
+   2. Limpia valores de texto (quita espacios extra)
+   3. Convierte valores vacíos a NaN (más fácil de manejar)
+   4. Parsea fechas automáticamente
+   5. Elimina filas duplicadas
+   6. Elimina filas completamente vacías
+   
+💡 VENTAJA:
+   Procesa archivos GIGANTES (>1GB) usando chunks (bloques pequeños)
+   sin saturar la memoria.
+
+📖 USO:
+   # Desde línea de comandos:
+   python -m Extract.Clean.Clean --input datos.csv --output datos_limpio.csv
+   
+   # Desde Python:
+   from Extract.Clean.Clean import clean_csv
+   clean_csv("IntegratedData.csv", "Output/IntegratedData_cleaned.csv")
 """
 
 from __future__ import annotations
@@ -21,43 +38,152 @@ import pandas as pd
 
 
 def normalize_column_name(name: str) -> str:
-	# Normaliza nombres: strip, lower, reemplaza espacios por guiones bajos
-	return name.strip().lower().replace(" ", "_").replace("\n", "_")
+	"""
+	🔤 NORMALIZAR NOMBRE DE COLUMNA - Estandariza nombres
+	
+	Qué hace:
+	- Quita espacios al inicio/final: "  Columna  " → "Columna"
+	- Convierte a minúsculas: "COLUMNA" → "columna"
+	- Reemplaza espacios por guiones bajos: "Mi Columna" → "mi_columna"
+	- Reemplaza saltos de línea: "Columna\n" → "columna_"
+	
+	¿Por qué es importante?
+	- Evita errores de tipeo ("Cases" vs "cases")
+	- Facilita autocompletado en código
+	- Mantiene consistencia en todo el proyecto
+	
+	Args:
+		name: Nombre original de la columna
+		
+	Returns:
+		Nombre normalizado (minúsculas, sin espacios)
+		
+	Ejemplo:
+		>>> normalize_column_name("  Daily Cases  ")
+		'daily_cases'
+		>>> normalize_column_name("RETAIL & Recreation")
+		'retail_&_recreation'
+	"""
+	# Paso 1: Quitar espacios al inicio/final
+	name = name.strip()
+	
+	# Paso 2: Convertir a minúsculas
+	name = name.lower()
+	
+	# Paso 3: Reemplazar espacios por _
+	name = name.replace(" ", "_")
+	
+	# Paso 4: Reemplazar saltos de línea por _
+	name = name.replace("\n", "_")
+	
+	return name
 
 
 def clean_chunk(df: pd.DataFrame) -> pd.DataFrame:
-	# Normalizar nombres de columnas una sola vez fuera de la función
-	# Limpiar strings: strip y convertir cadenas vacías a NaN
+	"""
+	🧹 LIMPIAR CHUNK - Limpia un bloque de datos
+	
+	Qué hace:
+	1. Limpia columnas de texto (strings):
+	   - Quita espacios extra: "  texto  " → "texto"
+	   - Convierte vacíos a NaN: "" → NaN
+	   - Convierte "nan" y "None" a NaN
+	
+	2. Parsea columnas de fecha:
+	   - Detecta columnas con "date" en el nombre
+	   - Convierte a formato datetime de pandas
+	   - Si falla, deja los valores como están
+	
+	Args:
+		df: DataFrame con un chunk de datos
+		
+	Returns:
+		DataFrame limpio (mismo chunk, valores mejorados)
+	
+	Ejemplo:
+		>>> chunk = pd.DataFrame({'date': ['2021-01-01', '2021-01-02'],
+		...                       'county': ['  Los Angeles  ', 'Miami']})
+		>>> cleaned = clean_chunk(chunk)
+		>>> cleaned['county']
+		0    Los Angeles
+		1    Miami
+	"""
+	# PASO 1: Limpiar columnas de texto (object = string en pandas)
+	# Seleccionar solo columnas de tipo texto
 	for col in df.select_dtypes(include=[object]).columns:
-		df[col] = df[col].astype(str).map(lambda s: s.strip() if s is not None else s)
-		df[col] = df[col].replace({"": pd.NA, "nan": pd.NA, "None": pd.NA})
+		# Convertir a string (por si hay valores None)
+		df[col] = df[col].astype(str)
+		
+		# Quitar espacios al inicio/final de cada valor
+		df[col] = df[col].map(lambda s: s.strip() if s is not None else s)
+		
+		# Reemplazar valores vacíos o "nan" con NaN real de pandas
+		df[col] = df[col].replace({
+			"": pd.NA,      # Strings vacíos
+			"nan": pd.NA,   # Texto "nan"
+			"None": pd.NA   # Texto "None"
+		})
 
-	# Intentar parsear columnas que parezcan fechas
+	# PASO 2: Parsear columnas de fecha
+	# Buscar columnas que tengan "date" en el nombre
 	for col in df.columns:
-		if "date" in col.lower():
+		if "date" in col.lower():  # Buscar sin importar mayúsculas
 			try:
+				# Intentar convertir a datetime
+				# errors="coerce": Si falla, pone NaT (Not a Time = fecha inválida)
 				df[col] = pd.to_datetime(df[col], errors="coerce")
 			except Exception:
-				# si falla, dejamos los valores tal como están
+				# Si falla completamente, dejar valores como están
+				# Esto evita que el script se detenga por un error
 				pass
 
 	return df
 
 
 def clean_csv(input_path: str, output_path: str, chunk_size: int = 100_000, overwrite: bool = True) -> None:
-	"""Limpia un CSV por chunks y escribe el resultado en output_path.
-
-	- Normaliza nombres de columnas
-	- Recorta strings y convierte cadenas vacías a NaN
-	- Intenta parsear columnas de fecha
-	- Elimina filas duplicadas (por chunk y luego globalmente)
-	- Elimina filas completamente vacías
 	"""
-	if not os.path.exists(os.path.dirname(output_path)):
-		os.makedirs(os.path.dirname(output_path), exist_ok=True)
+	🧹 LIMPIAR CSV - Función principal que limpia un archivo CSV completo
+	
+	🎯 ESTRATEGIA:
+	   Lee el archivo en CHUNKS (bloques) de 100,000 filas, limpia cada
+	   bloque, y guarda el resultado. Esto permite limpiar archivos de
+	   10GB+ con solo 2GB de RAM.
+	
+	🔄 PROCESO:
+	   1. Lee chunk 1 (100k filas) → Limpia → Guarda
+	   2. Lee chunk 2 (100k filas) → Limpia → Agrega al archivo
+	   3. Lee chunk 3 (100k filas) → Limpia → Agrega al archivo
+	   ... y así hasta terminar el archivo
+	
+	✅ LO QUE HACE:
+	   - Normaliza nombres de columnas (solo primera vez)
+	   - Limpia valores en cada chunk
+	   - Elimina filas completamente vacías
+	   - Elimina duplicados (dentro de cada chunk Y globalmente)
+	   - Guarda resultado en output_path
+	
+	Args:
+		input_path: Ruta al CSV original (ej: "IntegratedData.csv")
+		output_path: Dónde guardar el CSV limpio (ej: "Output/cleaned.csv")
+		chunk_size: Cuántas filas procesar a la vez (default: 100,000)
+		overwrite: Si True, sobrescribe archivo existente
+		
+	Ejemplo:
+		>>> clean_csv("IntegratedData.csv", "Output/IntegratedData_cleaned.csv")
+		🧹 Limpiando datos en chunks de 100,000 filas...
+		   Chunk 1: 100,000 filas procesadas
+		   Chunk 2: 100,000 filas procesadas
+		   ...
+		✅ Limpieza completada: Output/IntegratedData_cleaned.csv
+	"""
+	# Crear directorio de salida si no existe
+	output_dir = os.path.dirname(output_path)
+	if output_dir and not os.path.exists(output_dir):
+		os.makedirs(output_dir, exist_ok=True)
 
-	first_chunk = True
-	seen_hashes = set()
+	# Variables de control
+	first_chunk = True           # True solo para el primer chunk
+	seen_hashes = set()          # Para detectar duplicados globales
 
 	# Leer por chunks
 	for chunk in pd.read_csv(input_path, chunksize=chunk_size, low_memory=False):

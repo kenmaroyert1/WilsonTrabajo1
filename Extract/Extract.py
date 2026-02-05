@@ -1,8 +1,36 @@
-"""Módulo de extracción de datos.
+"""📥 MÓDULO DE EXTRACCIÓN DE DATOS
 
-Este módulo maneja la lectura y carga inicial de datos desde archivos CSV.
-Incluye funciones para lectura por chunks, validación de esquema y
-extracción selectiva de datos.
+Este módulo es el PRIMER PASO del pipeline ETL. Se encarga de LEER datos
+desde archivos CSV grandes de manera eficiente.
+
+🎯 PROPÓSITO:
+   Cargar datos de IntegratedData.csv (77MB) en memoria de forma inteligente,
+   con múltiples estrategias según necesidades (todo, chunks, muestra, filtrado).
+
+🔧 QUÉ HACE:
+   - Lee archivos CSV grandes sin saturar la memoria
+   - Valida que el archivo exista y sea legible
+   - Ofrece 7 métodos diferentes de extracción
+   - Filtra por estados, fechas, o columnas específicas
+   - Procesa por chunks para archivos gigantes
+
+💡 CÓMO USAR:
+   ```python
+   from Extract.Extract import DataExtractor
+   
+   # Crear extractor
+   extractor = DataExtractor("IntegratedData.csv")
+   
+   # Opción 1: Cargar todo
+   df = extractor.extract_full()
+   
+   # Opción 2: Solo California
+   df = extractor.extract_by_state(['California'])
+   
+   # Opción 3: Procesar por chunks (archivos muy grandes)
+   for chunk in extractor.extract_chunks(50000):
+       process(chunk)
+   ```
 """
 
 from __future__ import annotations
@@ -13,14 +41,23 @@ from typing import Optional, List, Iterator
 
 import pandas as pd
 
-# Importar configuración si está disponible
+# ============================================================================
+# IMPORTAR CONFIGURACIONES
+# ============================================================================
+# Intenta importar configuración centralizada; si falla, usa valores por defecto
+
 try:
+    # Importar desde Config.py (lo ideal)
     from Config.Config import (
-        RAW_DATA_FILE, CHUNK_SIZE, EXPECTED_COLUMNS,
-        DATE_COLUMNS, NUMERIC_COLUMNS, CATEGORICAL_COLUMNS
+        RAW_DATA_FILE,      # Ruta al CSV original
+        CHUNK_SIZE,         # Cuántas filas leer a la vez
+        EXPECTED_COLUMNS,   # Qué columnas esperamos encontrar
+        DATE_COLUMNS,       # Columnas de fecha (para parseo especial)
+        NUMERIC_COLUMNS,    # Columnas numéricas
+        CATEGORICAL_COLUMNS # Columnas de texto
     )
 except ImportError:
-    # Valores por defecto si no está disponible Config
+    # Si Config.py no existe, usar valores por defecto
     RAW_DATA_FILE = Path("IntegratedData.csv")
     CHUNK_SIZE = 100_000
     EXPECTED_COLUMNS = None
@@ -29,32 +66,83 @@ except ImportError:
     CATEGORICAL_COLUMNS = ['county', 'state']
 
 
+# ============================================================================
+# CLASE PRINCIPAL: DataExtractor
+# ============================================================================
+
 class DataExtractor:
-    """Clase para extraer datos desde archivos CSV."""
+    """
+    🔧 EXTRACTOR DE DATOS - Lee archivos CSV de múltiples formas
+    
+    Esta clase ofrece 7 métodos diferentes para leer datos según tus necesidades:
+    1. extract_full()         → Todo en memoria (si tienes RAM suficiente)
+    2. extract_chunks()       → Por bloques (para archivos gigantes)
+    3. extract_columns()      → Solo algunas columnas (ahorra memoria)
+    4. extract_sample()       → Muestra aleatoria (para pruebas)
+    5. extract_by_state()     → Filtrado por estados
+    6. extract_date_range()   → Filtrado por fechas
+    7. get_info()            → Info del archivo sin cargar datos
+    """
     
     def __init__(self, file_path: str | Path = None, chunk_size: int = None):
         """
-        Inicializa el extractor de datos.
+        🏗️ CONSTRUCTOR - Inicializa el extractor con la ruta del archivo
         
         Args:
-            file_path: Ruta al archivo CSV de entrada
-            chunk_size: Tamaño de chunk para lectura por bloques
+            file_path: Ruta al archivo CSV (ej: "IntegratedData.csv")
+                      Si no se proporciona, usa RAW_DATA_FILE de Config.py
+            chunk_size: Cuántas filas leer a la vez (default: 100,000)
+                       Más pequeño = menos memoria, más lento
+                       Más grande = más memoria, más rápido
+        
+        Ejemplo:
+            >>> extractor = DataExtractor("datos.csv", chunk_size=50000)
         """
+        # Convertir ruta a Path si es string
         self.file_path = Path(file_path) if file_path else RAW_DATA_FILE
+        
+        # Guardar tamaño de chunk
         self.chunk_size = chunk_size or CHUNK_SIZE
-        self.columns = None
-        self.dtypes = None
+        
+        # Variables para almacenar metadatos (se llenan después)
+        self.columns = None      # Nombres de columnas del CSV
+        self.dtypes = None       # Tipos de datos de cada columna
         
     def validate_file(self) -> bool:
-        """Valida que el archivo exista y sea legible."""
+        """
+        ✅ VALIDAR ARCHIVO - Verifica que el archivo exista y sea legible
+        
+        Qué hace:
+        1. Verifica que el archivo existe en el disco
+        2. Verifica que es un archivo (no un directorio)
+        3. Calcula y muestra el tamaño en MB
+        
+        Returns:
+            True si todo está bien
+            
+        Raises:
+            FileNotFoundError: Si el archivo no existe
+            ValueError: Si la ruta no es un archivo
+        
+        Ejemplo:
+            >>> extractor = DataExtractor("datos.csv")
+            >>> extractor.validate_file()
+            📁 Archivo encontrado: datos.csv
+            📊 Tamaño: 77.50 MB
+        """
+        # Paso 1: Verificar que existe
         if not self.file_path.exists():
             raise FileNotFoundError(f"Archivo no encontrado: {self.file_path}")
         
+        # Paso 2: Verificar que es un archivo (no directorio)
         if not self.file_path.is_file():
             raise ValueError(f"La ruta no es un archivo: {self.file_path}")
         
-        # Verificar tamaño
-        size_mb = self.file_path.stat().st_size / (1024 * 1024)
+        # Paso 3: Calcular tamaño en MB
+        size_bytes = self.file_path.stat().st_size        # Tamaño en bytes
+        size_mb = size_bytes / (1024 * 1024)              # Convertir a MB
+        
+        # Mostrar información
         print(f"📁 Archivo encontrado: {self.file_path.name}")
         print(f"📊 Tamaño: {size_mb:.2f} MB")
         
@@ -62,39 +150,93 @@ class DataExtractor:
     
     def extract_full(self, nrows: Optional[int] = None) -> pd.DataFrame:
         """
-        Extrae el dataset completo en memoria.
+        📥 EXTRACCIÓN COMPLETA - Carga TODO el archivo en memoria
+        
+        🎯 CUÁNDO USAR:
+           - Cuando tienes suficiente RAM (8GB+ para archivos de 77MB)
+           - Cuando necesitas todos los datos a la vez
+           - Para análisis que requieren el dataset completo
+        
+        ⚠️ ADVERTENCIA:
+           - Archivos >1GB pueden saturar la memoria
+           - Para archivos grandes, mejor usar extract_chunks()
         
         Args:
-            nrows: Número máximo de filas a leer (None = todas)
+            nrows: Número máximo de filas a leer
+                  None = leer todas las filas
+                  100 = solo primeras 100 filas (útil para pruebas)
             
         Returns:
-            DataFrame con los datos
+            pd.DataFrame con todos los datos cargados
+        
+        Ejemplo:
+            >>> extractor = DataExtractor("IntegratedData.csv")
+            >>> df = extractor.extract_full()
+            🔄 Extrayendo datos desde IntegratedData.csv...
+            ✅ Datos extraídos exitosamente
+               - Filas: 935,444
+               - Columnas: 17
         """
+        # Validar que el archivo existe antes de leer
         self.validate_file()
         
         print(f"🔄 Extrayendo datos desde {self.file_path.name}...")
         
         try:
+            # Leer CSV con pandas
+            # low_memory=False: Lee todo de una vez (más RAM, más rápido)
             df = pd.read_csv(
                 self.file_path,
-                nrows=nrows,
-                low_memory=False
+                nrows=nrows,          # Limitar filas si se especifica
+                low_memory=False      # Cargar todo en memoria
             )
             
+            # Mostrar estadísticas de lo que se cargó
             print(f"✅ Datos extraídos exitosamente")
-            print(f"   - Filas: {len(df):,}")
+            print(f"   - Filas: {len(df):,}")              # :, agrega separadores de miles
             print(f"   - Columnas: {len(df.columns)}")
             
+            # Guardar nombres de columnas para referencia futura
             self.columns = df.columns.tolist()
+            
             return df
             
         except Exception as e:
+            # Si algo sale mal, mostrar error y re-lanzar excepción
             print(f"❌ Error al extraer datos: {e}")
             raise
     
     def extract_chunks(self) -> Iterator[pd.DataFrame]:
         """
-        Extrae el dataset por chunks para procesamiento eficiente.
+        📦 EXTRACCIÓN POR CHUNKS - Lee el archivo en bloques pequeños
+        
+        🎯 CUÁNDO USAR:
+           - Archivos muy grandes (>1GB) que no caben en memoria
+           - Cuando quieres procesar datos de a poco
+           - Para streaming de datos sin cargar todo
+        
+        💡 VENTAJA:
+           - Usa poca memoria (solo un chunk a la vez)
+           - Puede procesar archivos de 10GB+ con solo 2GB RAM
+        
+        ⚠️ NOTA:
+           - Es un GENERADOR (iterator), no retorna DataFrame directo
+           - Debes iterar con un for loop
+        
+        Returns:
+            Iterator que produce DataFrames de chunk_size filas cada uno
+        
+        Ejemplo:
+            >>> extractor = DataExtractor("BigFile.csv", chunk_size=50000)
+            >>> for chunk in extractor.extract_chunks():
+            ...     # Procesar cada chunk
+            ...     print(f"Procesando {len(chunk)} filas...")
+            ...     process_data(chunk)
+            📦 Leyendo en chunks de 50,000 filas...
+            Procesando 50,000 filas...
+            Procesando 50,000 filas...
+            ...
+        """
         
         Yields:
             DataFrames en chunks del tamaño especificado
