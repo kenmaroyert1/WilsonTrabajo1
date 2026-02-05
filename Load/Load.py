@@ -1,7 +1,43 @@
-"""Módulo de carga de datos.
+"""💾 MÓDULO DE CARGA Y PERSISTENCIA DE DATOS
 
-Este módulo contiene funciones para guardar, exportar y cargar datos
-procesados en diferentes formatos.
+Este módulo es el CUARTO PASO del pipeline ETL. Se encarga de GUARDAR
+los datos procesados en disco para uso posterior.
+
+🎯 PROPÓSITO:
+   Guardar datos transformados en múltiples formatos (CSV, Excel, JSON, Parquet)
+   y facilitar su carga para análisis futuros o compartir con otros.
+
+🔧 QUÉ HACE:
+   1. Guarda datos en 4 formatos diferentes (CSV, Excel, JSON, Parquet)
+   2. Crea backups automáticos con timestamp
+   3. Guarda metadatos (info sobre los datos)
+   4. Carga datos desde archivos guardados
+   5. Lista y gestiona archivos de salida
+
+💡 USO SIMPLE:
+   ```python
+   from Load.Load import DataLoader
+   import pandas as pd
+   
+   # Crear loader
+   loader = DataLoader()
+   
+   # Guardar en CSV
+   df = pd.DataFrame({'A': [1,2,3], 'B': [4,5,6]})
+   loader.save_to_csv(df, "resultados.csv")
+   
+   # Cargar de vuelta
+   df_loaded = loader.load_from_csv("resultados.csv")
+   
+   # Crear backup
+   loader.create_backup("resultados.csv")  # resultados_backup_20260204_103015.csv
+   ```
+
+📊 FORMATOS SOPORTADOS:
+   - CSV: Universal, compatible con todo (Excel, R, Python)
+   - Excel: Para reportes, análisis en Excel/Google Sheets
+   - JSON: Para APIs, aplicaciones web
+   - Parquet: Comprimido, 70% más pequeño que CSV, más rápido
 """
 
 from __future__ import annotations
@@ -12,7 +48,10 @@ import pandas as pd
 import json
 from datetime import datetime
 
-# Importar configuración si está disponible
+# ============================================================================
+# IMPORTAR CONFIGURACIONES
+# ============================================================================
+
 try:
     from Config.Config import OUTPUT_DIR, FIGURES_DIR, CHUNK_SIZE
 except ImportError:
@@ -21,17 +60,40 @@ except ImportError:
     CHUNK_SIZE = 100_000
 
 
+# ============================================================================
+# CLASE PRINCIPAL: DataLoader
+# ============================================================================
+
 class DataLoader:
-    """Clase para cargar y guardar datos procesados."""
+    """
+    💾 CARGADOR DE DATOS - Guarda y carga datos en múltiples formatos
+    
+    Esta clase facilita:
+    - Guardar datos procesados (CSV, Excel, JSON, Parquet)
+    - Cargar datos guardados
+    - Crear backups con timestamp
+    - Gestionar metadatos
+    - Listar archivos de salida
+    """
     
     def __init__(self, output_dir: Optional[Path] = None):
         """
-        Inicializa el loader con directorio de salida.
+        🏗️ CONSTRUCTOR - Inicializa el loader
         
         Args:
-            output_dir: Directorio de salida (None = usar OUTPUT_DIR)
+            output_dir: Dónde guardar archivos (default: Output/)
+                       Si no existe, lo crea automáticamente
+        
+        Ejemplo:
+            >>> loader = DataLoader()  # Usa Output/
+            >>> loader = DataLoader("MisResultados/")  # Usa carpeta custom
         """
+        # Usar OUTPUT_DIR de Config.py si no se especifica
         self.output_dir = Path(output_dir) if output_dir else OUTPUT_DIR
+        
+        # Crear directorio si no existe
+        # parents=True: crea directorios padres también
+        # exist_ok=True: no da error si ya existe
         self.output_dir.mkdir(parents=True, exist_ok=True)
     
     def save_to_csv(self, 
@@ -40,14 +102,28 @@ class DataLoader:
                     index: bool = False,
                     **kwargs) -> Path:
         """
-        Guarda DataFrame a archivo CSV.
+        💾 GUARDAR CSV - Guarda DataFrame en formato CSV
+        
+        CSV = Comma Separated Values (valores separados por comas)
+        - Formato universal, compatible con TODO
+        - Fácil de abrir en Excel, Google Sheets, R, Python
+        - Tamaño mediano (no comprimido)
         
         Args:
             df: DataFrame a guardar
-            filename: Nombre del archivo
-            index: Si incluir índice
-            **kwargs: Argumentos adicionales para to_csv
+            filename: Nombre del archivo (ej: "resultados.csv")
+                     Si no termina en .csv, se agrega automáticamente
+            index: Si incluir índice del DataFrame (default: False)
+            **kwargs: Argumentos extras para pandas.to_csv()
             
+        Returns:
+            Path: Ruta completa del archivo guardado
+            
+        Ejemplo:
+            >>> loader = DataLoader()
+            >>> df = pd.DataFrame({'A': [1,2,3]})
+            >>> path = loader.save_to_csv(df, "datos.csv")
+            ✅ CSV guardado: datos.csv (0.15 MB)
         Returns:
             Path del archivo guardado
         """

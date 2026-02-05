@@ -1,7 +1,49 @@
-"""Módulo de transformación de datos.
+"""🔄 MÓDULO DE TRANSFORMACIÓN DE DATOS
 
-Este módulo contiene funciones para transformar, agregar y calcular
-métricas derivadas a partir de los datos limpios de COVID-19.
+Este módulo es el TERCER PASO del pipeline ETL. Se encarga de TRANSFORMAR
+datos limpios en información útil calculando métricas derivadas.
+
+🎯 PROPÓSITO:
+   Convertir datos crudos en métricas significativas que revelan patrones,
+   tendencias y relaciones en la pandemia de COVID-19.
+
+🔧 QUÉ HACE:
+   1. Promedios móviles (suaviza fluctuaciones diarias)
+   2. Tasas de crecimiento y mortalidad
+   3. Agregaciones por fecha/estado/condado
+   4. Rankings (top N más afectados)
+   5. Matrices de correlación (qué variables se relacionan)
+   6. Features temporales (año, mes, semana)
+   7. Normalización de datos
+   8. Detección y remoción de outliers
+
+💡 EJEMPLO SIMPLE:
+   ```python
+   from Transform.Transform import DataTransformer
+   import pandas as pd
+   
+   # Cargar datos limpios
+   df = pd.read_csv("Output/IntegratedData_cleaned.csv")
+   
+   # Crear transformador
+   transformer = DataTransformer(df)
+   
+   # Calcular promedio móvil de 7 días (elimina ruido)
+   df_transformed = transformer.calculate_moving_average('daily_cases', window=7)
+   
+   # Calcular tasa de mortalidad (deaths/cases * 100)
+   df_transformed = transformer.calculate_mortality_rate()
+   
+   # Obtener top 10 estados más afectados
+   top_states = transformer.get_top_states('cases', n=10)
+   ```
+
+📊 FUNCIONES PRINCIPALES:
+   - calculate_moving_average(): Suaviza series temporales
+   - calculate_mortality_rate(): Calcula letalidad del virus
+   - aggregate_by_date(): Suma nacional diaria
+   - get_top_states(): Ranking de estados
+   - calculate_correlation_matrix(): Relaciones entre variables
 """
 
 from __future__ import annotations
@@ -10,13 +52,21 @@ from typing import Optional, List
 import pandas as pd
 import numpy as np
 
-# Importar configuración si está disponible
+# ============================================================================
+# IMPORTAR CONFIGURACIONES
+# ============================================================================
+
 try:
+    # Importar constantes desde Config.py
     from Config.Config import (
-        MOVING_AVERAGE_WINDOW, TOP_N_COUNTIES, TOP_N_STATES,
-        MOBILITY_COLUMNS, NUMERIC_COLUMNS
+        MOVING_AVERAGE_WINDOW,  # Ventana para promedio móvil (7 días)
+        TOP_N_COUNTIES,         # Cuántos condados mostrar (10)
+        TOP_N_STATES,           # Cuántos estados mostrar (10)
+        MOBILITY_COLUMNS,       # Columnas de movilidad
+        NUMERIC_COLUMNS         # Columnas numéricas
     )
 except ImportError:
+    # Si Config.py no existe, usar valores por defecto
     MOVING_AVERAGE_WINDOW = 7
     TOP_N_COUNTIES = 10
     TOP_N_STATES = 10
@@ -25,22 +75,62 @@ except ImportError:
     NUMERIC_COLUMNS = ['cases', 'deaths', 'daily_cases', 'daily_deaths']
 
 
+# ============================================================================
+# CLASE PRINCIPAL: DataTransformer
+# ============================================================================
+
 class DataTransformer:
-    """Clase para transformar y enriquecer datos de COVID-19."""
+    """
+    🔄 TRANSFORMADOR DE DATOS - Calcula métricas derivadas
+    
+    Esta clase toma datos limpios y calcula métricas útiles:
+    - Promedios móviles (suaviza fluctuaciones)
+    - Tasas de cambio (crecimiento, mortalidad)
+    - Agregaciones (sumas por fecha/estado/condado)
+    - Rankings (top N más afectados)
+    - Correlaciones (qué variables se relacionan)
+    """
     
     def __init__(self, df: pd.DataFrame):
         """
-        Inicializa el transformador con un DataFrame.
+        🏗️ CONSTRUCTOR - Inicializa el transformador
         
         Args:
-            df: DataFrame con datos limpios
+            df: DataFrame con datos limpios (después de Clean.py)
+        
+        Qué hace:
+            - Copia el DataFrame (no modifica el original)
+            - Convierte columna 'date' a formato datetime si existe
+        
+        Ejemplo:
+            >>> import pandas as pd
+            >>> df = pd.read_csv("Output/IntegratedData_cleaned.csv")
+            >>> transformer = DataTransformer(df)
         """
+        # Hacer una COPIA del DataFrame (no modificar el original)
         self.df = df.copy()
+        
+        # Asegurar que la columna 'date' esté en formato correcto
         self._ensure_date_column()
     
     def _ensure_date_column(self):
-        """Asegura que la columna date esté en formato datetime."""
+        """
+        🗓️ ASEGURAR FORMATO DE FECHA - Convierte 'date' a datetime
+        
+        Qué hace:
+            - Busca si existe columna 'date'
+            - La convierte a formato datetime de pandas
+            - Si ya está en datetime, no hace nada
+            - Si tiene errores, pone NaT (Not a Time)
+        
+        ¿Por qué es importante?
+            - Facilita operaciones con fechas (filtrar, agrupar, ordenar)
+            - Permite calcular diferencias entre fechas
+            - Necesario para agregaciones temporales
+        """
         if 'date' in self.df.columns:
+            # Convertir a datetime
+            # errors='coerce': Si falla, pone NaT en lugar de error
             self.df['date'] = pd.to_datetime(self.df['date'], errors='coerce')
     
     def calculate_moving_average(self, 
@@ -48,6 +138,27 @@ class DataTransformer:
                                  window: int = None,
                                  center: bool = True) -> pd.DataFrame:
         """
+        📈 PROMEDIO MÓVIL - Suaviza fluctuaciones diarias
+        
+        🎯 ¿QUÉ ES UN PROMEDIO MÓVIL?
+           Es el promedio de los últimos N días. Elimina picos/valles
+           artificiales (ej: menos reportes los fines de semana) y muestra
+           la TENDENCIA REAL.
+        
+        📊 EJEMPLO VISUAL:
+           Datos diarios:     100, 80, 90, 50, 60, 110, 95
+           Promedio móvil 3:   -,  90, 90, 73, 66, 85,  88
+                              (promedio de últimos 3 valores)
+        
+        ⚠️ USO TÍPICO:
+           - window=7 (1 semana): Elimina efecto fin de semana
+           - window=14 (2 semanas): Suavizado más agresivo
+           - window=3 (3 días): Más sensible a cambios
+        
+        Args:
+            column: Columna a suavizar (ej: 'daily_cases')
+            window: Ventana en días (default: 7)
+            center: Si True, centra la ventana (más preciso)
         Calcula promedio móvil para una columna.
         
         Args:
